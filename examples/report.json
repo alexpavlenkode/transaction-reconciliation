@@ -1,0 +1,2223 @@
+{
+  "generated_at": "2026-10-22T20:09:46+00:00",
+  "config": {
+    "amount_tolerance": "0.00",
+    "fuzzy_enabled": true,
+    "fuzzy_time_window_days": 3.0,
+    "fuzzy_min_ref_similarity": 0.8,
+    "fuzzy_min_ref_similarity_if_amount_differs": 0.92,
+    "fuzzy_min_score": 0.8,
+    "high_threshold_eur": "500",
+    "medium_threshold_eur": "50"
+  },
+  "sources": [
+    {
+      "source": "internal",
+      "path": "data/internal.db",
+      "rows_read": 47,
+      "imported": 47,
+      "errors": 0,
+      "warnings": 0
+    },
+    {
+      "source": "provider_a",
+      "path": "data/provider_a.csv",
+      "rows_read": 29,
+      "imported": 28,
+      "errors": 1,
+      "warnings": 0
+    },
+    {
+      "source": "provider_b",
+      "path": "data/provider_b.json",
+      "rows_read": 17,
+      "imported": 16,
+      "errors": 1,
+      "warnings": 1
+    }
+  ],
+  "summary": {
+    "internal_total": 47,
+    "provider_total": 44,
+    "matched": 40,
+    "matched_exact": 37,
+    "matched_fuzzy": 3,
+    "unmatched_internal": 6,
+    "unmatched_provider": 3,
+    "duplicates": 2,
+    "discrepancies": 26,
+    "clean_matches": 25,
+    "match_rate": 0.8791,
+    "clean_rate": 0.5495,
+    "by_priority": {
+      "HIGH": 7,
+      "MEDIUM": 10,
+      "LOW": 9
+    },
+    "by_kind": {
+      "CURRENCY_MISMATCH": {
+        "count": 1,
+        "impact": {
+          "EUR": "-200.00",
+          "USD": "200.00"
+        }
+      },
+      "MISSING_IN_PROVIDER": {
+        "count": 6,
+        "impact": {
+          "EUR": "-2526.00"
+        }
+      },
+      "MISSING_IN_DB": {
+        "count": 3,
+        "impact": {
+          "EUR": "747.99"
+        }
+      },
+      "DUPLICATE_IN_DB": {
+        "count": 1,
+        "impact": {
+          "EUR": "-145.00"
+        }
+      },
+      "DUPLICATE_IN_PROVIDER": {
+        "count": 1,
+        "impact": {
+          "EUR": "310.00"
+        }
+      },
+      "STATUS_MISMATCH": {
+        "count": 7,
+        "impact": {
+          "EUR": "-4754.90"
+        }
+      },
+      "AMOUNT_MISMATCH": {
+        "count": 5,
+        "impact": {
+          "EUR": "-10791.00"
+        }
+      },
+      "REFERENCE_MISMATCH": {
+        "count": 2,
+        "impact": {}
+      }
+    },
+    "net_impact": {
+      "EUR": "-17358.91",
+      "USD": "200.00"
+    },
+    "gross_impact": {
+      "EUR": "19804.89",
+      "USD": "200.00"
+    },
+    "providers": [
+      {
+        "provider": "A",
+        "internal_total": 30,
+        "provider_total": 28,
+        "matched": 25,
+        "exact": 23,
+        "fuzzy": 2,
+        "missing_in_provider": 5,
+        "missing_in_db": 2,
+        "duplicates": 1,
+        "discrepancies": 18,
+        "impact": {
+          "EUR": "-15393.91"
+        }
+      },
+      {
+        "provider": "B",
+        "internal_total": 17,
+        "provider_total": 16,
+        "matched": 15,
+        "exact": 14,
+        "fuzzy": 1,
+        "missing_in_provider": 1,
+        "missing_in_db": 1,
+        "duplicates": 1,
+        "discrepancies": 8,
+        "impact": {
+          "EUR": "-1965.00",
+          "USD": "200.00"
+        }
+      }
+    ]
+  },
+  "discrepancies": [
+    {
+      "id": "D-001",
+      "priority": "HIGH",
+      "priority_label": "Hoch",
+      "kinds": [
+        "AMOUNT_MISMATCH"
+      ],
+      "kind_labels": [
+        "Betragsabweichung"
+      ],
+      "provider": "A",
+      "internal": {
+        "source": "internal",
+        "record_id": "1017",
+        "reference": "ATX-28268772",
+        "amount": "12000.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-28T03:58:12+00:00",
+        "note": "SO-27119"
+      },
+      "provider_tx": {
+        "source": "provider_a",
+        "record_id": "ATX-28268772",
+        "reference": "ATX-28268772",
+        "amount": "1200.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "ABGESCHLOSSEN",
+        "timestamp": "2025-03-28T03:59:04+00:00",
+        "note": ""
+      },
+      "impact": {
+        "EUR": "-10800.00"
+      },
+      "description": "Betrag weicht ab: Datenbank 12.000,00 EUR vs. Anbieter 1.200,00 EUR (Differenz -10.800,00 EUR).",
+      "action": "Korrekten Betrag am Beleg klären; Differenz beim Anbieter reklamieren oder Buchung korrigieren.",
+      "match_method": "exact"
+    },
+    {
+      "id": "D-002",
+      "priority": "HIGH",
+      "priority_label": "Hoch",
+      "kinds": [
+        "STATUS_MISMATCH"
+      ],
+      "kind_labels": [
+        "Statusabweichung"
+      ],
+      "provider": "A",
+      "internal": {
+        "source": "internal",
+        "record_id": "1020",
+        "reference": "ATX-87490478",
+        "amount": "2500.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-09T21:07:45+00:00",
+        "note": "SO-27140"
+      },
+      "provider_tx": {
+        "source": "provider_a",
+        "record_id": "ATX-87490478",
+        "reference": "ATX-87490478",
+        "amount": "2500.00",
+        "currency": "EUR",
+        "status": "REFUNDED",
+        "raw_status": "ERSTATTET",
+        "timestamp": "2025-03-09T21:09:35+00:00",
+        "note": ""
+      },
+      "impact": {
+        "EUR": "-2500.00"
+      },
+      "description": "Status weicht ab: Datenbank abgeschlossen vs. Anbieter erstattet.",
+      "action": "Zahlung ist beim Anbieter nicht abgeschlossen: Forderung wieder öffnen und Leistung/Versand prüfen.",
+      "match_method": "exact"
+    },
+    {
+      "id": "D-003",
+      "priority": "HIGH",
+      "priority_label": "Hoch",
+      "kinds": [
+        "MISSING_IN_PROVIDER"
+      ],
+      "kind_labels": [
+        "Fehlt in Abrechnung"
+      ],
+      "provider": "A",
+      "internal": {
+        "source": "internal",
+        "record_id": "1023",
+        "reference": "ATX-85523350",
+        "amount": "1800.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-04T20:19:51+00:00",
+        "note": "SO-27161"
+      },
+      "provider_tx": null,
+      "impact": {
+        "EUR": "-1800.00"
+      },
+      "description": "Nur in der Datenbank: 1.800,00 EUR (abgeschlossen) vom 04.03.2025 20:19; Abrechnung von Anbieter A enthält keinen Eintrag.",
+      "action": "Beim Anbieter nachfragen, ob die Zahlung eingegangen ist; ohne Beleg Forderung offen halten bzw. stornieren.",
+      "match_method": null
+    },
+    {
+      "id": "D-004",
+      "priority": "HIGH",
+      "priority_label": "Hoch",
+      "kinds": [
+        "STATUS_MISMATCH"
+      ],
+      "kind_labels": [
+        "Statusabweichung"
+      ],
+      "provider": "B",
+      "internal": {
+        "source": "internal",
+        "record_id": "1042",
+        "reference": "bpay_9a3aad9bb6",
+        "amount": "1150.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-23T05:13:05+00:00",
+        "note": "SO-27294"
+      },
+      "provider_tx": {
+        "source": "provider_b",
+        "record_id": "bpay_9a3aad9bb6",
+        "reference": "bpay_9a3aad9bb6",
+        "amount": "1150.00",
+        "currency": "EUR",
+        "status": "FAILED",
+        "raw_status": "declined",
+        "timestamp": "2025-03-23T05:14:51+00:00",
+        "note": ""
+      },
+      "impact": {
+        "EUR": "-1150.00"
+      },
+      "description": "Status weicht ab: Datenbank abgeschlossen vs. Anbieter fehlgeschlagen.",
+      "action": "Zahlung ist beim Anbieter nicht abgeschlossen: Forderung wieder öffnen und Leistung/Versand prüfen.",
+      "match_method": "exact"
+    },
+    {
+      "id": "D-005",
+      "priority": "HIGH",
+      "priority_label": "Hoch",
+      "kinds": [
+        "MISSING_IN_DB"
+      ],
+      "kind_labels": [
+        "Fehlt in Datenbank"
+      ],
+      "provider": "A",
+      "internal": null,
+      "provider_tx": {
+        "source": "provider_a",
+        "record_id": "ATX-85523351",
+        "reference": "ATX-85523351",
+        "amount": "640.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "ABGESCHLOSSEN",
+        "timestamp": "2025-03-04T22:19:51+00:00",
+        "note": ""
+      },
+      "impact": {
+        "EUR": "640.00"
+      },
+      "description": "Nur in der Abrechnung von Anbieter A: 640,00 EUR (abgeschlossen) vom 04.03.2025 22:19; keine passende Buchung in der Datenbank.",
+      "action": "Geldeingang dem passenden Vorgang zuordnen und nachbuchen.",
+      "match_method": null
+    },
+    {
+      "id": "D-006",
+      "priority": "HIGH",
+      "priority_label": "Hoch",
+      "kinds": [
+        "STATUS_MISMATCH",
+        "AMOUNT_MISMATCH"
+      ],
+      "kind_labels": [
+        "Statusabweichung",
+        "Betragsabweichung"
+      ],
+      "provider": "A",
+      "internal": {
+        "source": "internal",
+        "record_id": "1022",
+        "reference": "ATX-81349318",
+        "amount": "500.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-23T11:50:09+00:00",
+        "note": "SO-27154"
+      },
+      "provider_tx": {
+        "source": "provider_a",
+        "record_id": "ATX-81349318",
+        "reference": "ATX-81349318",
+        "amount": "450.00",
+        "currency": "EUR",
+        "status": "PENDING",
+        "raw_status": "AUSSTEHEND",
+        "timestamp": "2025-03-23T11:51:05+00:00",
+        "note": ""
+      },
+      "impact": {
+        "EUR": "-500.00"
+      },
+      "description": "Status weicht ab: Datenbank abgeschlossen vs. Anbieter ausstehend. Betrag weicht ab: Datenbank 500,00 EUR vs. Anbieter 450,00 EUR (Differenz -50,00 EUR).",
+      "action": "Zahlung ist beim Anbieter nicht abgeschlossen: Forderung wieder öffnen und Leistung/Versand prüfen. Korrekten Betrag am Beleg klären; Differenz beim Anbieter reklamieren oder Buchung korrigieren.",
+      "match_method": "exact"
+    },
+    {
+      "id": "D-007",
+      "priority": "HIGH",
+      "priority_label": "Hoch",
+      "kinds": [
+        "CURRENCY_MISMATCH"
+      ],
+      "kind_labels": [
+        "Währungsabweichung"
+      ],
+      "provider": "B",
+      "internal": {
+        "source": "internal",
+        "record_id": "1040",
+        "reference": "bpay_e8ae863265",
+        "amount": "200.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-07T23:00:56+00:00",
+        "note": "SO-27280"
+      },
+      "provider_tx": {
+        "source": "provider_b",
+        "record_id": "bpay_e8ae863265",
+        "reference": "bpay_e8ae863265",
+        "amount": "200.00",
+        "currency": "USD",
+        "status": "COMPLETED",
+        "raw_status": "captured",
+        "timestamp": "2025-03-07T23:02:34+00:00",
+        "note": ""
+      },
+      "impact": {
+        "EUR": "-200.00",
+        "USD": "200.00"
+      },
+      "description": "Währung weicht ab: Datenbank 200,00 EUR vs. Anbieter 200,00 USD; Beträge sind nicht vergleichbar.",
+      "action": "Währung der Buchung gegen den Beleg prüfen und Fehlbuchung korrigieren.",
+      "match_method": "exact"
+    },
+    {
+      "id": "D-008",
+      "priority": "MEDIUM",
+      "priority_label": "Mittel",
+      "kinds": [
+        "MISSING_IN_PROVIDER"
+      ],
+      "kind_labels": [
+        "Fehlt in Abrechnung"
+      ],
+      "provider": "A",
+      "internal": {
+        "source": "internal",
+        "record_id": "1027",
+        "reference": "ATX-83009462",
+        "amount": "410.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-27T02:53:18+00:00",
+        "note": "SO-27189"
+      },
+      "provider_tx": null,
+      "impact": {
+        "EUR": "-410.00"
+      },
+      "description": "Nur in der Datenbank: 410,00 EUR (abgeschlossen) vom 27.03.2025 02:53; Abrechnung von Anbieter A enthält keinen Eintrag. Die Abrechnungsdatei enthält einen unlesbaren Datensatz mit dieser Referenz (siehe Importprobleme).",
+      "action": "Beim Anbieter nachfragen, ob die Zahlung eingegangen ist; ohne Beleg Forderung offen halten bzw. stornieren.",
+      "match_method": null
+    },
+    {
+      "id": "D-009",
+      "priority": "MEDIUM",
+      "priority_label": "Mittel",
+      "kinds": [
+        "STATUS_MISMATCH"
+      ],
+      "kind_labels": [
+        "Statusabweichung"
+      ],
+      "provider": "A",
+      "internal": {
+        "source": "internal",
+        "record_id": "1018",
+        "reference": "ATX-21622603",
+        "amount": "349.90",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-23T16:39:30+00:00",
+        "note": "SO-27126"
+      },
+      "provider_tx": {
+        "source": "provider_a",
+        "record_id": "ATX-21622603",
+        "reference": "ATX-21622603",
+        "amount": "349.90",
+        "currency": "EUR",
+        "status": "FAILED",
+        "raw_status": "FEHLGESCHLAGEN",
+        "timestamp": "2025-03-23T16:41:12+00:00",
+        "note": ""
+      },
+      "impact": {
+        "EUR": "-349.90"
+      },
+      "description": "Status weicht ab: Datenbank abgeschlossen vs. Anbieter fehlgeschlagen.",
+      "action": "Zahlung ist beim Anbieter nicht abgeschlossen: Forderung wieder öffnen und Leistung/Versand prüfen.",
+      "match_method": "exact"
+    },
+    {
+      "id": "D-010",
+      "priority": "MEDIUM",
+      "priority_label": "Mittel",
+      "kinds": [
+        "STATUS_MISMATCH"
+      ],
+      "kind_labels": [
+        "Statusabweichung"
+      ],
+      "provider": "B",
+      "internal": {
+        "source": "internal",
+        "record_id": "1043",
+        "reference": "bpay_82ee6d74f5",
+        "amount": "330.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-08T18:31:40+00:00",
+        "note": "SO-27301"
+      },
+      "provider_tx": {
+        "source": "provider_b",
+        "record_id": "bpay_82ee6d74f5",
+        "reference": "bpay_82ee6d74f5",
+        "amount": "330.00",
+        "currency": "EUR",
+        "status": "UNKNOWN",
+        "raw_status": "chargeback_initiated",
+        "timestamp": "2025-03-08T18:32:15+00:00",
+        "note": ""
+      },
+      "impact": {
+        "EUR": "-330.00"
+      },
+      "description": "Status weicht ab: Datenbank abgeschlossen vs. Anbieter unbekannt ('chargeback_initiated').",
+      "action": "Zahlung ist beim Anbieter nicht abgeschlossen: Forderung wieder öffnen und Leistung/Versand prüfen.",
+      "match_method": "exact"
+    },
+    {
+      "id": "D-011",
+      "priority": "MEDIUM",
+      "priority_label": "Mittel",
+      "kinds": [
+        "DUPLICATE_IN_PROVIDER"
+      ],
+      "kind_labels": [
+        "Duplikat in Abrechnung"
+      ],
+      "provider": "A",
+      "internal": null,
+      "provider_tx": {
+        "source": "provider_a",
+        "record_id": "ATX-54450551",
+        "reference": "ATX-54450551",
+        "amount": "310.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "ABGESCHLOSSEN",
+        "timestamp": "2025-03-15T14:54:25+00:00",
+        "note": ""
+      },
+      "impact": {
+        "EUR": "310.00"
+      },
+      "description": "Doppelte Abrechnung: Referenz 'ATX-54450551' kommt mehrfach in der Abrechnung vor; 310,00 EUR ist bereits der DB-ID 1028 zugeordnet.",
+      "action": "Doppelte Abrechnung beim Anbieter reklamieren (mögliche Doppelbelastung).",
+      "match_method": null
+    },
+    {
+      "id": "D-012",
+      "priority": "MEDIUM",
+      "priority_label": "Mittel",
+      "kinds": [
+        "MISSING_IN_PROVIDER"
+      ],
+      "kind_labels": [
+        "Fehlt in Abrechnung"
+      ],
+      "provider": "B",
+      "internal": {
+        "source": "internal",
+        "record_id": "1044",
+        "reference": "bpay_cc50b8a435",
+        "amount": "210.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-12T09:53:03+00:00",
+        "note": "SO-27308"
+      },
+      "provider_tx": null,
+      "impact": {
+        "EUR": "-210.00"
+      },
+      "description": "Nur in der Datenbank: 210,00 EUR (abgeschlossen) vom 12.03.2025 09:53; Abrechnung von Anbieter B enthält keinen Eintrag.",
+      "action": "Beim Anbieter nachfragen, ob die Zahlung eingegangen ist; ohne Beleg Forderung offen halten bzw. stornieren.",
+      "match_method": null
+    },
+    {
+      "id": "D-013",
+      "priority": "MEDIUM",
+      "priority_label": "Mittel",
+      "kinds": [
+        "DUPLICATE_IN_DB"
+      ],
+      "kind_labels": [
+        "Duplikat in Datenbank"
+      ],
+      "provider": "B",
+      "internal": {
+        "source": "internal",
+        "record_id": "1046",
+        "reference": "bpay_84e7808d1c",
+        "amount": "145.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-18T16:22:37+00:00",
+        "note": "SO-27322"
+      },
+      "provider_tx": null,
+      "impact": {
+        "EUR": "-145.00"
+      },
+      "description": "Doppelbuchung: Referenz 'bpay_84e7808d1c' ist mehrfach in der Datenbank; 145,00 EUR ist bereits dem Anbietereintrag zugeordnet (DB-ID 1045).",
+      "action": "Doppelbuchung prüfen und die überzählige Buchung stornieren.",
+      "match_method": null
+    },
+    {
+      "id": "D-014",
+      "priority": "MEDIUM",
+      "priority_label": "Mittel",
+      "kinds": [
+        "AMOUNT_MISMATCH"
+      ],
+      "kind_labels": [
+        "Betragsabweichung"
+      ],
+      "provider": "A",
+      "internal": {
+        "source": "internal",
+        "record_id": "1016",
+        "reference": "ATX-42675569",
+        "amount": "899.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-02T21:43:57+00:00",
+        "note": "SO-27112"
+      },
+      "provider_tx": {
+        "source": "provider_a",
+        "record_id": "ATX-42675569",
+        "reference": "ATX-42675569",
+        "amount": "989.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "ABGESCHLOSSEN",
+        "timestamp": "2025-03-02T21:44:16+00:00",
+        "note": ""
+      },
+      "impact": {
+        "EUR": "90.00"
+      },
+      "description": "Betrag weicht ab: Datenbank 899,00 EUR vs. Anbieter 989,00 EUR (Differenz +90,00 EUR).",
+      "action": "Korrekten Betrag am Beleg klären; Differenz beim Anbieter reklamieren oder Buchung korrigieren.",
+      "match_method": "exact"
+    },
+    {
+      "id": "D-015",
+      "priority": "MEDIUM",
+      "priority_label": "Mittel",
+      "kinds": [
+        "MISSING_IN_DB"
+      ],
+      "kind_labels": [
+        "Fehlt in Datenbank"
+      ],
+      "provider": "B",
+      "internal": null,
+      "provider_tx": {
+        "source": "provider_b",
+        "record_id": "bpay_e2028c88e3",
+        "reference": "bpay_e2028c88e3",
+        "amount": "88.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "captured",
+        "timestamp": "2025-03-18T11:16:56+00:00",
+        "note": ""
+      },
+      "impact": {
+        "EUR": "88.00"
+      },
+      "description": "Nur in der Abrechnung von Anbieter B: 88,00 EUR (abgeschlossen) vom 18.03.2025 11:16; keine passende Buchung in der Datenbank.",
+      "action": "Geldeingang dem passenden Vorgang zuordnen und nachbuchen.",
+      "match_method": null
+    },
+    {
+      "id": "D-016",
+      "priority": "MEDIUM",
+      "priority_label": "Mittel",
+      "kinds": [
+        "STATUS_MISMATCH"
+      ],
+      "kind_labels": [
+        "Statusabweichung"
+      ],
+      "provider": "A",
+      "internal": {
+        "source": "internal",
+        "record_id": "1019",
+        "reference": "ATX-47281038",
+        "amount": "75.00",
+        "currency": "EUR",
+        "status": "PENDING",
+        "raw_status": "pending",
+        "timestamp": "2025-03-22T19:53:33+00:00",
+        "note": "SO-27133"
+      },
+      "provider_tx": {
+        "source": "provider_a",
+        "record_id": "ATX-47281038",
+        "reference": "ATX-47281038",
+        "amount": "75.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "ABGESCHLOSSEN",
+        "timestamp": "2025-03-22T19:55:22+00:00",
+        "note": ""
+      },
+      "impact": {
+        "EUR": "75.00"
+      },
+      "description": "Status weicht ab: Datenbank ausstehend vs. Anbieter abgeschlossen.",
+      "action": "Status in der Datenbank aktualisieren (Zahlung ist beim Anbieter abgeschlossen).",
+      "match_method": "exact"
+    },
+    {
+      "id": "D-017",
+      "priority": "MEDIUM",
+      "priority_label": "Mittel",
+      "kinds": [
+        "MISSING_IN_PROVIDER"
+      ],
+      "kind_labels": [
+        "Fehlt in Abrechnung"
+      ],
+      "provider": "A",
+      "internal": {
+        "source": "internal",
+        "record_id": "1026",
+        "reference": null,
+        "amount": "64.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-12T08:19:40+00:00",
+        "note": "SO-27182"
+      },
+      "provider_tx": null,
+      "impact": {
+        "EUR": "-64.00"
+      },
+      "description": "Nur in der Datenbank: 64,00 EUR (abgeschlossen) vom 12.03.2025 08:19; Abrechnung von Anbieter A enthält keinen Eintrag. Es ist keine Provider-Referenz hinterlegt.",
+      "action": "Beim Anbieter nachfragen, ob die Zahlung eingegangen ist; ohne Beleg Forderung offen halten bzw. stornieren.",
+      "match_method": null
+    },
+    {
+      "id": "D-018",
+      "priority": "LOW",
+      "priority_label": "Niedrig",
+      "kinds": [
+        "AMOUNT_MISMATCH"
+      ],
+      "kind_labels": [
+        "Betragsabweichung"
+      ],
+      "provider": "A",
+      "internal": {
+        "source": "internal",
+        "record_id": "1015",
+        "reference": "ATX-36588931",
+        "amount": "1250.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-11T10:32:39+00:00",
+        "note": "SO-27105"
+      },
+      "provider_tx": {
+        "source": "provider_a",
+        "record_id": "ATX-36588931",
+        "reference": "ATX-36588931",
+        "amount": "1205.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "ABGESCHLOSSEN",
+        "timestamp": "2025-03-11T10:32:59+00:00",
+        "note": ""
+      },
+      "impact": {
+        "EUR": "-45.00"
+      },
+      "description": "Betrag weicht ab: Datenbank 1.250,00 EUR vs. Anbieter 1.205,00 EUR (Differenz -45,00 EUR).",
+      "action": "Korrekten Betrag am Beleg klären; Differenz beim Anbieter reklamieren oder Buchung korrigieren.",
+      "match_method": "exact"
+    },
+    {
+      "id": "D-019",
+      "priority": "LOW",
+      "priority_label": "Niedrig",
+      "kinds": [
+        "MISSING_IN_PROVIDER"
+      ],
+      "kind_labels": [
+        "Fehlt in Abrechnung"
+      ],
+      "provider": "A",
+      "internal": {
+        "source": "internal",
+        "record_id": "1024",
+        "reference": "ATX-67928316",
+        "amount": "42.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-02T17:09:04+00:00",
+        "note": "SO-27168"
+      },
+      "provider_tx": null,
+      "impact": {
+        "EUR": "-42.00"
+      },
+      "description": "Nur in der Datenbank: 42,00 EUR (abgeschlossen) vom 02.03.2025 17:09; Abrechnung von Anbieter A enthält keinen Eintrag.",
+      "action": "Beim Anbieter nachfragen, ob die Zahlung eingegangen ist; ohne Beleg Forderung offen halten bzw. stornieren.",
+      "match_method": null
+    },
+    {
+      "id": "D-020",
+      "priority": "LOW",
+      "priority_label": "Niedrig",
+      "kinds": [
+        "MISSING_IN_DB"
+      ],
+      "kind_labels": [
+        "Fehlt in Datenbank"
+      ],
+      "provider": "A",
+      "internal": null,
+      "provider_tx": {
+        "source": "provider_a",
+        "record_id": "ATX-31598691",
+        "reference": "ATX-31598691",
+        "amount": "19.99",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "ABGESCHLOSSEN",
+        "timestamp": "2025-03-14T22:09:23+00:00",
+        "note": ""
+      },
+      "impact": {
+        "EUR": "19.99"
+      },
+      "description": "Nur in der Abrechnung von Anbieter A: 19,99 EUR (abgeschlossen) vom 14.03.2025 22:09; keine passende Buchung in der Datenbank.",
+      "action": "Geldeingang dem passenden Vorgang zuordnen und nachbuchen.",
+      "match_method": null
+    },
+    {
+      "id": "D-021",
+      "priority": "LOW",
+      "priority_label": "Niedrig",
+      "kinds": [
+        "AMOUNT_MISMATCH"
+      ],
+      "kind_labels": [
+        "Betragsabweichung"
+      ],
+      "provider": "B",
+      "internal": {
+        "source": "internal",
+        "record_id": "1041",
+        "reference": "bpay_5dbdcb245d",
+        "amount": "75.50",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-08T15:25:38+00:00",
+        "note": "SO-27287"
+      },
+      "provider_tx": {
+        "source": "provider_b",
+        "record_id": "bpay_5dbdcb245d",
+        "reference": "bpay_5dbdcb245d",
+        "amount": "57.50",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "captured",
+        "timestamp": "2025-03-08T15:26:33+00:00",
+        "note": ""
+      },
+      "impact": {
+        "EUR": "-18.00"
+      },
+      "description": "Betrag weicht ab: Datenbank 75,50 EUR vs. Anbieter 57,50 EUR (Differenz -18,00 EUR).",
+      "action": "Korrekten Betrag am Beleg klären; Differenz beim Anbieter reklamieren oder Buchung korrigieren.",
+      "match_method": "exact"
+    },
+    {
+      "id": "D-022",
+      "priority": "LOW",
+      "priority_label": "Niedrig",
+      "kinds": [
+        "AMOUNT_MISMATCH",
+        "REFERENCE_MISMATCH"
+      ],
+      "kind_labels": [
+        "Betragsabweichung",
+        "Unscharfe Zuordnung"
+      ],
+      "provider": "A",
+      "internal": {
+        "source": "internal",
+        "record_id": "1030",
+        "reference": "ATX-47001509",
+        "amount": "220.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-27T19:42:05+00:00",
+        "note": "SO-27210"
+      },
+      "provider_tx": {
+        "source": "provider_a",
+        "record_id": "TX-47001509",
+        "reference": "TX-47001509",
+        "amount": "202.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "ABGESCHLOSSEN",
+        "timestamp": "2025-03-27T19:42:45+00:00",
+        "note": ""
+      },
+      "impact": {
+        "EUR": "-18.00"
+      },
+      "description": "Betrag weicht ab: Datenbank 220,00 EUR vs. Anbieter 202,00 EUR (Differenz -18,00 EUR). Zuordnung über unscharfe Suche: Referenz 'ATX-47001509' (DB) ↔ 'TX-47001509' (Anbieter), Konfidenz 95%.",
+      "action": "Korrekten Betrag am Beleg klären; Differenz beim Anbieter reklamieren oder Buchung korrigieren. Zuordnung bestätigen und die Referenz in der Datenbank korrigieren.",
+      "match_method": "fuzzy"
+    },
+    {
+      "id": "D-023",
+      "priority": "LOW",
+      "priority_label": "Niedrig",
+      "kinds": [
+        "MISSING_IN_PROVIDER"
+      ],
+      "kind_labels": [
+        "Fehlt in Abrechnung"
+      ],
+      "provider": "A",
+      "internal": {
+        "source": "internal",
+        "record_id": "1025",
+        "reference": "ATX-54461448",
+        "amount": "120.00",
+        "currency": "EUR",
+        "status": "PENDING",
+        "raw_status": "pending",
+        "timestamp": "2025-03-13T05:03:45+00:00",
+        "note": "SO-27175"
+      },
+      "provider_tx": null,
+      "impact": {},
+      "description": "Nur in der Datenbank: 120,00 EUR (ausstehend) vom 13.03.2025 05:03; Abrechnung von Anbieter A enthält keinen Eintrag.",
+      "action": "Buchung ist nicht abgeschlossen: nächste Abrechnung abwarten und erneut abgleichen.",
+      "match_method": null
+    },
+    {
+      "id": "D-024",
+      "priority": "LOW",
+      "priority_label": "Niedrig",
+      "kinds": [
+        "STATUS_MISMATCH"
+      ],
+      "kind_labels": [
+        "Statusabweichung"
+      ],
+      "provider": "A",
+      "internal": {
+        "source": "internal",
+        "record_id": "1021",
+        "reference": "ATX-53501687",
+        "amount": "33.00",
+        "currency": "EUR",
+        "status": "PENDING",
+        "raw_status": "pending",
+        "timestamp": "2025-03-26T22:28:15+00:00",
+        "note": "SO-27147"
+      },
+      "provider_tx": {
+        "source": "provider_a",
+        "record_id": "ATX-53501687",
+        "reference": "ATX-53501687",
+        "amount": "33.00",
+        "currency": "EUR",
+        "status": "FAILED",
+        "raw_status": "FEHLGESCHLAGEN",
+        "timestamp": "2025-03-26T22:29:17+00:00",
+        "note": ""
+      },
+      "impact": {},
+      "description": "Status weicht ab: Datenbank ausstehend vs. Anbieter fehlgeschlagen.",
+      "action": "Status mit dem Anbieter klären; derzeit keine finanzielle Wirkung.",
+      "match_method": "exact"
+    },
+    {
+      "id": "D-025",
+      "priority": "LOW",
+      "priority_label": "Niedrig",
+      "kinds": [
+        "REFERENCE_MISMATCH"
+      ],
+      "kind_labels": [
+        "Unscharfe Zuordnung"
+      ],
+      "provider": "B",
+      "internal": {
+        "source": "internal",
+        "record_id": "1047",
+        "reference": "bpay_4253720ec4",
+        "amount": "62.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-04T13:39:28+00:00",
+        "note": "SO-27329"
+      },
+      "provider_tx": {
+        "source": "provider_b",
+        "record_id": "bpay_425720ec4",
+        "reference": "bpay_425720ec4",
+        "amount": "62.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "captured",
+        "timestamp": "2025-03-04T13:39:52+00:00",
+        "note": ""
+      },
+      "impact": {},
+      "description": "Zuordnung über unscharfe Suche: Referenz 'bpay_4253720ec4' (DB) ↔ 'bpay_425720ec4' (Anbieter), Konfidenz 98%.",
+      "action": "Zuordnung bestätigen und die Referenz in der Datenbank korrigieren.",
+      "match_method": "fuzzy"
+    },
+    {
+      "id": "D-026",
+      "priority": "LOW",
+      "priority_label": "Niedrig",
+      "kinds": [
+        "REFERENCE_MISMATCH"
+      ],
+      "kind_labels": [
+        "Unscharfe Zuordnung"
+      ],
+      "provider": "A",
+      "internal": {
+        "source": "internal",
+        "record_id": "1029",
+        "reference": "ATX-20133979",
+        "amount": "180.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-08T11:00:54+00:00",
+        "note": "SO-27203"
+      },
+      "provider_tx": {
+        "source": "provider_a",
+        "record_id": "ATX-2013397O",
+        "reference": "ATX-2013397O",
+        "amount": "180.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "ABGESCHLOSSEN",
+        "timestamp": "2025-03-08T11:02:24+00:00",
+        "note": ""
+      },
+      "impact": {},
+      "description": "Zuordnung über unscharfe Suche: Referenz 'ATX-20133979' (DB) ↔ 'ATX-2013397O' (Anbieter), Konfidenz 94%.",
+      "action": "Zuordnung bestätigen und die Referenz in der Datenbank korrigieren.",
+      "match_method": "fuzzy"
+    }
+  ],
+  "matched_total": 40,
+  "matched": [
+    {
+      "internal": {
+        "source": "internal",
+        "record_id": "1011",
+        "reference": "ATX-35413626",
+        "amount": "250.00",
+        "currency": "USD",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-02T15:01:06+00:00",
+        "note": "SO-27077"
+      },
+      "provider_tx": {
+        "source": "provider_a",
+        "record_id": "ATX-35413626",
+        "reference": "ATX-35413626",
+        "amount": "250.00",
+        "currency": "USD",
+        "status": "COMPLETED",
+        "raw_status": "ABGESCHLOSSEN",
+        "timestamp": "2025-03-02T15:02:41+00:00",
+        "note": ""
+      },
+      "provider": "A",
+      "method": "exact",
+      "confidence": 1.0,
+      "has_discrepancy": false
+    },
+    {
+      "internal": {
+        "source": "internal",
+        "record_id": "1016",
+        "reference": "ATX-42675569",
+        "amount": "899.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-02T21:43:57+00:00",
+        "note": "SO-27112"
+      },
+      "provider_tx": {
+        "source": "provider_a",
+        "record_id": "ATX-42675569",
+        "reference": "ATX-42675569",
+        "amount": "989.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "ABGESCHLOSSEN",
+        "timestamp": "2025-03-02T21:44:16+00:00",
+        "note": ""
+      },
+      "provider": "A",
+      "method": "exact",
+      "confidence": 1.0,
+      "has_discrepancy": true
+    },
+    {
+      "internal": {
+        "source": "internal",
+        "record_id": "1008",
+        "reference": "ATX-65217433",
+        "amount": "310.75",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-03T17:21:25+00:00",
+        "note": "SO-27056"
+      },
+      "provider_tx": {
+        "source": "provider_a",
+        "record_id": "ATX-65217433",
+        "reference": "ATX-65217433",
+        "amount": "310.75",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "ABGESCHLOSSEN",
+        "timestamp": "2025-03-03T17:22:48+00:00",
+        "note": ""
+      },
+      "provider": "A",
+      "method": "exact",
+      "confidence": 1.0,
+      "has_discrepancy": false
+    },
+    {
+      "internal": {
+        "source": "internal",
+        "record_id": "1047",
+        "reference": "bpay_4253720ec4",
+        "amount": "62.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-04T13:39:28+00:00",
+        "note": "SO-27329"
+      },
+      "provider_tx": {
+        "source": "provider_b",
+        "record_id": "bpay_425720ec4",
+        "reference": "bpay_425720ec4",
+        "amount": "62.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "captured",
+        "timestamp": "2025-03-04T13:39:52+00:00",
+        "note": ""
+      },
+      "provider": "B",
+      "method": "fuzzy",
+      "confidence": 0.978,
+      "has_discrepancy": true
+    },
+    {
+      "internal": {
+        "source": "internal",
+        "record_id": "1001",
+        "reference": "atx-84860229",
+        "amount": "49.90",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-05T08:21:18+00:00",
+        "note": "SO-27007"
+      },
+      "provider_tx": {
+        "source": "provider_a",
+        "record_id": "ATX-84860229",
+        "reference": "ATX-84860229",
+        "amount": "49.90",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "ABGESCHLOSSEN",
+        "timestamp": "2025-03-05T08:22:45+00:00",
+        "note": ""
+      },
+      "provider": "A",
+      "method": "exact",
+      "confidence": 1.0,
+      "has_discrepancy": false
+    },
+    {
+      "internal": {
+        "source": "internal",
+        "record_id": "1014",
+        "reference": "ATX-89949668",
+        "amount": "27.90",
+        "currency": "EUR",
+        "status": "PENDING",
+        "raw_status": "pending",
+        "timestamp": "2025-03-06T17:04:21+00:00",
+        "note": "SO-27098"
+      },
+      "provider_tx": {
+        "source": "provider_a",
+        "record_id": "ATX-89949668",
+        "reference": "ATX-89949668",
+        "amount": "27.90",
+        "currency": "EUR",
+        "status": "PENDING",
+        "raw_status": "AUSSTEHEND",
+        "timestamp": "2025-03-06T17:05:35+00:00",
+        "note": ""
+      },
+      "provider": "A",
+      "method": "exact",
+      "confidence": 1.0,
+      "has_discrepancy": false
+    },
+    {
+      "internal": {
+        "source": "internal",
+        "record_id": "1006",
+        "reference": "ATX-15818526",
+        "amount": "560.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-07T02:16:50+00:00",
+        "note": "SO-27042"
+      },
+      "provider_tx": {
+        "source": "provider_a",
+        "record_id": "ATX-15818526",
+        "reference": "ATX-15818526",
+        "amount": "560.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "ABGESCHLOSSEN",
+        "timestamp": "2025-03-07T02:18:33+00:00",
+        "note": ""
+      },
+      "provider": "A",
+      "method": "exact",
+      "confidence": 1.0,
+      "has_discrepancy": false
+    },
+    {
+      "internal": {
+        "source": "internal",
+        "record_id": "1040",
+        "reference": "bpay_e8ae863265",
+        "amount": "200.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-07T23:00:56+00:00",
+        "note": "SO-27280"
+      },
+      "provider_tx": {
+        "source": "provider_b",
+        "record_id": "bpay_e8ae863265",
+        "reference": "bpay_e8ae863265",
+        "amount": "200.00",
+        "currency": "USD",
+        "status": "COMPLETED",
+        "raw_status": "captured",
+        "timestamp": "2025-03-07T23:02:34+00:00",
+        "note": ""
+      },
+      "provider": "B",
+      "method": "exact",
+      "confidence": 1.0,
+      "has_discrepancy": true
+    },
+    {
+      "internal": {
+        "source": "internal",
+        "record_id": "1029",
+        "reference": "ATX-20133979",
+        "amount": "180.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-08T11:00:54+00:00",
+        "note": "SO-27203"
+      },
+      "provider_tx": {
+        "source": "provider_a",
+        "record_id": "ATX-2013397O",
+        "reference": "ATX-2013397O",
+        "amount": "180.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "ABGESCHLOSSEN",
+        "timestamp": "2025-03-08T11:02:24+00:00",
+        "note": ""
+      },
+      "provider": "A",
+      "method": "fuzzy",
+      "confidence": 0.945,
+      "has_discrepancy": true
+    },
+    {
+      "internal": {
+        "source": "internal",
+        "record_id": "1031",
+        "reference": "BPAY_A39060CA11",
+        "amount": "35.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-08T12:53:44+00:00",
+        "note": "SO-27217"
+      },
+      "provider_tx": {
+        "source": "provider_b",
+        "record_id": "bpay_a39060ca11",
+        "reference": "bpay_a39060ca11",
+        "amount": "35.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "captured",
+        "timestamp": "2025-03-08T12:53:49+00:00",
+        "note": ""
+      },
+      "provider": "B",
+      "method": "exact",
+      "confidence": 1.0,
+      "has_discrepancy": false
+    },
+    {
+      "internal": {
+        "source": "internal",
+        "record_id": "1041",
+        "reference": "bpay_5dbdcb245d",
+        "amount": "75.50",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-08T15:25:38+00:00",
+        "note": "SO-27287"
+      },
+      "provider_tx": {
+        "source": "provider_b",
+        "record_id": "bpay_5dbdcb245d",
+        "reference": "bpay_5dbdcb245d",
+        "amount": "57.50",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "captured",
+        "timestamp": "2025-03-08T15:26:33+00:00",
+        "note": ""
+      },
+      "provider": "B",
+      "method": "exact",
+      "confidence": 1.0,
+      "has_discrepancy": true
+    },
+    {
+      "internal": {
+        "source": "internal",
+        "record_id": "1037",
+        "reference": "bpay_92dad0400c",
+        "amount": "15800",
+        "currency": "JPY",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-08T16:06:24+00:00",
+        "note": "SO-27259"
+      },
+      "provider_tx": {
+        "source": "provider_b",
+        "record_id": "bpay_92dad0400c",
+        "reference": "bpay_92dad0400c",
+        "amount": "15800",
+        "currency": "JPY",
+        "status": "COMPLETED",
+        "raw_status": "captured",
+        "timestamp": "2025-03-08T16:07:02+00:00",
+        "note": ""
+      },
+      "provider": "B",
+      "method": "exact",
+      "confidence": 1.0,
+      "has_discrepancy": false
+    },
+    {
+      "internal": {
+        "source": "internal",
+        "record_id": "1043",
+        "reference": "bpay_82ee6d74f5",
+        "amount": "330.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-08T18:31:40+00:00",
+        "note": "SO-27301"
+      },
+      "provider_tx": {
+        "source": "provider_b",
+        "record_id": "bpay_82ee6d74f5",
+        "reference": "bpay_82ee6d74f5",
+        "amount": "330.00",
+        "currency": "EUR",
+        "status": "UNKNOWN",
+        "raw_status": "chargeback_initiated",
+        "timestamp": "2025-03-08T18:32:15+00:00",
+        "note": ""
+      },
+      "provider": "B",
+      "method": "exact",
+      "confidence": 1.0,
+      "has_discrepancy": true
+    },
+    {
+      "internal": {
+        "source": "internal",
+        "record_id": "1033",
+        "reference": "BPAY_928DDA3E06",
+        "amount": "56.20",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-08T19:09:51+00:00",
+        "note": "SO-27231"
+      },
+      "provider_tx": {
+        "source": "provider_b",
+        "record_id": "bpay_928dda3e06",
+        "reference": "bpay_928dda3e06",
+        "amount": "56.20",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "captured",
+        "timestamp": "2025-03-08T19:11:00+00:00",
+        "note": ""
+      },
+      "provider": "B",
+      "method": "exact",
+      "confidence": 1.0,
+      "has_discrepancy": false
+    },
+    {
+      "internal": {
+        "source": "internal",
+        "record_id": "1002",
+        "reference": "ATX-74103220",
+        "amount": "120.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-09T17:53:28+00:00",
+        "note": "SO-27014"
+      },
+      "provider_tx": {
+        "source": "provider_a",
+        "record_id": "ATX-74103220",
+        "reference": "ATX-74103220",
+        "amount": "120.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "ABGESCHLOSSEN",
+        "timestamp": "2025-03-09T17:54:40+00:00",
+        "note": ""
+      },
+      "provider": "A",
+      "method": "exact",
+      "confidence": 1.0,
+      "has_discrepancy": false
+    },
+    {
+      "internal": {
+        "source": "internal",
+        "record_id": "1020",
+        "reference": "ATX-87490478",
+        "amount": "2500.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-09T21:07:45+00:00",
+        "note": "SO-27140"
+      },
+      "provider_tx": {
+        "source": "provider_a",
+        "record_id": "ATX-87490478",
+        "reference": "ATX-87490478",
+        "amount": "2500.00",
+        "currency": "EUR",
+        "status": "REFUNDED",
+        "raw_status": "ERSTATTET",
+        "timestamp": "2025-03-09T21:09:35+00:00",
+        "note": ""
+      },
+      "provider": "A",
+      "method": "exact",
+      "confidence": 1.0,
+      "has_discrepancy": true
+    },
+    {
+      "internal": {
+        "source": "internal",
+        "record_id": "1010",
+        "reference": "atx-18968577",
+        "amount": "7.50",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-10T18:19:59+00:00",
+        "note": "SO-27070"
+      },
+      "provider_tx": {
+        "source": "provider_a",
+        "record_id": "ATX-18968577",
+        "reference": "ATX-18968577",
+        "amount": "7.50",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "ABGESCHLOSSEN",
+        "timestamp": "2025-03-10T18:21:42+00:00",
+        "note": ""
+      },
+      "provider": "A",
+      "method": "exact",
+      "confidence": 1.0,
+      "has_discrepancy": false
+    },
+    {
+      "internal": {
+        "source": "internal",
+        "record_id": "1015",
+        "reference": "ATX-36588931",
+        "amount": "1250.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-11T10:32:39+00:00",
+        "note": "SO-27105"
+      },
+      "provider_tx": {
+        "source": "provider_a",
+        "record_id": "ATX-36588931",
+        "reference": "ATX-36588931",
+        "amount": "1205.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "ABGESCHLOSSEN",
+        "timestamp": "2025-03-11T10:32:59+00:00",
+        "note": ""
+      },
+      "provider": "A",
+      "method": "exact",
+      "confidence": 1.0,
+      "has_discrepancy": true
+    },
+    {
+      "internal": {
+        "source": "internal",
+        "record_id": "1036",
+        "reference": "bpay_3434fc75e9",
+        "amount": "775.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-11T16:38:28+00:00",
+        "note": "SO-27252"
+      },
+      "provider_tx": {
+        "source": "provider_b",
+        "record_id": "bpay_3434fc75e9",
+        "reference": "bpay_3434fc75e9",
+        "amount": "775.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "captured",
+        "timestamp": "2025-03-11T16:38:51+00:00",
+        "note": ""
+      },
+      "provider": "B",
+      "method": "exact",
+      "confidence": 1.0,
+      "has_discrepancy": false
+    },
+    {
+      "internal": {
+        "source": "internal",
+        "record_id": "1004",
+        "reference": "atx-86465021",
+        "amount": "15.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-12T14:18:28+00:00",
+        "note": "SO-27028"
+      },
+      "provider_tx": {
+        "source": "provider_a",
+        "record_id": "ATX-86465021",
+        "reference": "ATX-86465021",
+        "amount": "15.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "ABGESCHLOSSEN",
+        "timestamp": "2025-03-12T14:18:41+00:00",
+        "note": ""
+      },
+      "provider": "A",
+      "method": "exact",
+      "confidence": 1.0,
+      "has_discrepancy": false
+    },
+    {
+      "internal": {
+        "source": "internal",
+        "record_id": "1039",
+        "reference": "bpay_2cf2fad60e",
+        "amount": "129.00",
+        "currency": "EUR",
+        "status": "REFUNDED",
+        "raw_status": "refunded",
+        "timestamp": "2025-03-12T22:00:40+00:00",
+        "note": "SO-27273"
+      },
+      "provider_tx": {
+        "source": "provider_b",
+        "record_id": "bpay_2cf2fad60e",
+        "reference": "bpay_2cf2fad60e",
+        "amount": "129.00",
+        "currency": "EUR",
+        "status": "REFUNDED",
+        "raw_status": "refunded",
+        "timestamp": "2025-03-12T22:02:18+00:00",
+        "note": ""
+      },
+      "provider": "B",
+      "method": "exact",
+      "confidence": 1.0,
+      "has_discrepancy": false
+    },
+    {
+      "internal": {
+        "source": "internal",
+        "record_id": "1028",
+        "reference": "ATX-54450551",
+        "amount": "310.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-15T14:51:25+00:00",
+        "note": "SO-27196"
+      },
+      "provider_tx": {
+        "source": "provider_a",
+        "record_id": "ATX-54450551",
+        "reference": "ATX-54450551",
+        "amount": "310.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "ABGESCHLOSSEN",
+        "timestamp": "2025-03-15T14:52:16+00:00",
+        "note": ""
+      },
+      "provider": "A",
+      "method": "exact",
+      "confidence": 1.0,
+      "has_discrepancy": false
+    },
+    {
+      "internal": {
+        "source": "internal",
+        "record_id": "1045",
+        "reference": "bpay_84e7808d1c",
+        "amount": "145.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-18T16:17:37+00:00",
+        "note": "SO-27315"
+      },
+      "provider_tx": {
+        "source": "provider_b",
+        "record_id": "bpay_84e7808d1c",
+        "reference": "bpay_84e7808d1c",
+        "amount": "145.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "captured",
+        "timestamp": "2025-03-18T16:18:29+00:00",
+        "note": ""
+      },
+      "provider": "B",
+      "method": "exact",
+      "confidence": 1.0,
+      "has_discrepancy": false
+    },
+    {
+      "internal": {
+        "source": "internal",
+        "record_id": "1003",
+        "reference": "ATX-10060049",
+        "amount": "1234.56",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-19T08:32:58+00:00",
+        "note": "SO-27021"
+      },
+      "provider_tx": {
+        "source": "provider_a",
+        "record_id": "ATX-10060049",
+        "reference": "ATX-10060049",
+        "amount": "1234.56",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "ABGESCHLOSSEN",
+        "timestamp": "2025-03-19T08:33:51+00:00",
+        "note": ""
+      },
+      "provider": "A",
+      "method": "exact",
+      "confidence": 1.0,
+      "has_discrepancy": false
+    },
+    {
+      "internal": {
+        "source": "internal",
+        "record_id": "1007",
+        "reference": "atx-38394179",
+        "amount": "23.45",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-19T13:31:37+00:00",
+        "note": "SO-27049"
+      },
+      "provider_tx": {
+        "source": "provider_a",
+        "record_id": "ATX-38394179",
+        "reference": "ATX-38394179",
+        "amount": "23.45",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "ABGESCHLOSSEN",
+        "timestamp": "2025-03-19T13:31:54+00:00",
+        "note": ""
+      },
+      "provider": "A",
+      "method": "exact",
+      "confidence": 1.0,
+      "has_discrepancy": false
+    },
+    {
+      "internal": {
+        "source": "internal",
+        "record_id": "1012",
+        "reference": "ATX-40592523",
+        "amount": "64.00",
+        "currency": "EUR",
+        "status": "REFUNDED",
+        "raw_status": "refunded",
+        "timestamp": "2025-03-20T15:14:11+00:00",
+        "note": "SO-27084"
+      },
+      "provider_tx": {
+        "source": "provider_a",
+        "record_id": "ATX-40592523",
+        "reference": "ATX-40592523",
+        "amount": "64.00",
+        "currency": "EUR",
+        "status": "REFUNDED",
+        "raw_status": "ERSTATTET",
+        "timestamp": "2025-03-20T15:15:14+00:00",
+        "note": ""
+      },
+      "provider": "A",
+      "method": "exact",
+      "confidence": 1.0,
+      "has_discrepancy": false
+    },
+    {
+      "internal": {
+        "source": "internal",
+        "record_id": "1005",
+        "reference": "ATX-61364363",
+        "amount": "89.99",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-20T19:03:02+00:00",
+        "note": "SO-27035"
+      },
+      "provider_tx": {
+        "source": "provider_a",
+        "record_id": "ATX-61364363",
+        "reference": "ATX-61364363",
+        "amount": "89.99",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "ABGESCHLOSSEN",
+        "timestamp": "2025-03-20T19:03:19+00:00",
+        "note": ""
+      },
+      "provider": "A",
+      "method": "exact",
+      "confidence": 1.0,
+      "has_discrepancy": false
+    },
+    {
+      "internal": {
+        "source": "internal",
+        "record_id": "1035",
+        "reference": "BPAY_810645CAE8",
+        "amount": "9.99",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-21T03:04:45+00:00",
+        "note": "SO-27245"
+      },
+      "provider_tx": {
+        "source": "provider_b",
+        "record_id": "bpay_810645cae8",
+        "reference": "bpay_810645cae8",
+        "amount": "9.99",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "captured",
+        "timestamp": "2025-03-21T03:06:17+00:00",
+        "note": ""
+      },
+      "provider": "B",
+      "method": "exact",
+      "confidence": 1.0,
+      "has_discrepancy": false
+    },
+    {
+      "internal": {
+        "source": "internal",
+        "record_id": "1038",
+        "reference": "bpay_9518300ccc",
+        "amount": "99.00",
+        "currency": "USD",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-22T09:30:33+00:00",
+        "note": "SO-27266"
+      },
+      "provider_tx": {
+        "source": "provider_b",
+        "record_id": "bpay_9518300ccc",
+        "reference": "bpay_9518300ccc",
+        "amount": "99.00",
+        "currency": "USD",
+        "status": "COMPLETED",
+        "raw_status": "captured",
+        "timestamp": "2025-03-22T09:31:03+00:00",
+        "note": ""
+      },
+      "provider": "B",
+      "method": "exact",
+      "confidence": 1.0,
+      "has_discrepancy": false
+    },
+    {
+      "internal": {
+        "source": "internal",
+        "record_id": "1019",
+        "reference": "ATX-47281038",
+        "amount": "75.00",
+        "currency": "EUR",
+        "status": "PENDING",
+        "raw_status": "pending",
+        "timestamp": "2025-03-22T19:53:33+00:00",
+        "note": "SO-27133"
+      },
+      "provider_tx": {
+        "source": "provider_a",
+        "record_id": "ATX-47281038",
+        "reference": "ATX-47281038",
+        "amount": "75.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "ABGESCHLOSSEN",
+        "timestamp": "2025-03-22T19:55:22+00:00",
+        "note": ""
+      },
+      "provider": "A",
+      "method": "exact",
+      "confidence": 1.0,
+      "has_discrepancy": true
+    },
+    {
+      "internal": {
+        "source": "internal",
+        "record_id": "1042",
+        "reference": "bpay_9a3aad9bb6",
+        "amount": "1150.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-23T05:13:05+00:00",
+        "note": "SO-27294"
+      },
+      "provider_tx": {
+        "source": "provider_b",
+        "record_id": "bpay_9a3aad9bb6",
+        "reference": "bpay_9a3aad9bb6",
+        "amount": "1150.00",
+        "currency": "EUR",
+        "status": "FAILED",
+        "raw_status": "declined",
+        "timestamp": "2025-03-23T05:14:51+00:00",
+        "note": ""
+      },
+      "provider": "B",
+      "method": "exact",
+      "confidence": 1.0,
+      "has_discrepancy": true
+    },
+    {
+      "internal": {
+        "source": "internal",
+        "record_id": "1022",
+        "reference": "ATX-81349318",
+        "amount": "500.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-23T11:50:09+00:00",
+        "note": "SO-27154"
+      },
+      "provider_tx": {
+        "source": "provider_a",
+        "record_id": "ATX-81349318",
+        "reference": "ATX-81349318",
+        "amount": "450.00",
+        "currency": "EUR",
+        "status": "PENDING",
+        "raw_status": "AUSSTEHEND",
+        "timestamp": "2025-03-23T11:51:05+00:00",
+        "note": ""
+      },
+      "provider": "A",
+      "method": "exact",
+      "confidence": 1.0,
+      "has_discrepancy": true
+    },
+    {
+      "internal": {
+        "source": "internal",
+        "record_id": "1018",
+        "reference": "ATX-21622603",
+        "amount": "349.90",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-23T16:39:30+00:00",
+        "note": "SO-27126"
+      },
+      "provider_tx": {
+        "source": "provider_a",
+        "record_id": "ATX-21622603",
+        "reference": "ATX-21622603",
+        "amount": "349.90",
+        "currency": "EUR",
+        "status": "FAILED",
+        "raw_status": "FEHLGESCHLAGEN",
+        "timestamp": "2025-03-23T16:41:12+00:00",
+        "note": ""
+      },
+      "provider": "A",
+      "method": "exact",
+      "confidence": 1.0,
+      "has_discrepancy": true
+    },
+    {
+      "internal": {
+        "source": "internal",
+        "record_id": "1034",
+        "reference": "bpay_57d35cae17",
+        "amount": "210.50",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-26T06:56:31+00:00",
+        "note": "SO-27238"
+      },
+      "provider_tx": {
+        "source": "provider_b",
+        "record_id": "bpay_57d35cae17",
+        "reference": "bpay_57d35cae17",
+        "amount": "210.50",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "captured",
+        "timestamp": "2025-03-26T06:57:07+00:00",
+        "note": ""
+      },
+      "provider": "B",
+      "method": "exact",
+      "confidence": 1.0,
+      "has_discrepancy": false
+    },
+    {
+      "internal": {
+        "source": "internal",
+        "record_id": "1013",
+        "reference": "ATX-57576259",
+        "amount": "18.00",
+        "currency": "EUR",
+        "status": "FAILED",
+        "raw_status": "failed",
+        "timestamp": "2025-03-26T13:31:56+00:00",
+        "note": "SO-27091"
+      },
+      "provider_tx": {
+        "source": "provider_a",
+        "record_id": "ATX-57576259",
+        "reference": "ATX-57576259",
+        "amount": "18.00",
+        "currency": "EUR",
+        "status": "FAILED",
+        "raw_status": "FEHLGESCHLAGEN",
+        "timestamp": "2025-03-26T13:32:04+00:00",
+        "note": ""
+      },
+      "provider": "A",
+      "method": "exact",
+      "confidence": 1.0,
+      "has_discrepancy": false
+    },
+    {
+      "internal": {
+        "source": "internal",
+        "record_id": "1021",
+        "reference": "ATX-53501687",
+        "amount": "33.00",
+        "currency": "EUR",
+        "status": "PENDING",
+        "raw_status": "pending",
+        "timestamp": "2025-03-26T22:28:15+00:00",
+        "note": "SO-27147"
+      },
+      "provider_tx": {
+        "source": "provider_a",
+        "record_id": "ATX-53501687",
+        "reference": "ATX-53501687",
+        "amount": "33.00",
+        "currency": "EUR",
+        "status": "FAILED",
+        "raw_status": "FEHLGESCHLAGEN",
+        "timestamp": "2025-03-26T22:29:17+00:00",
+        "note": ""
+      },
+      "provider": "A",
+      "method": "exact",
+      "confidence": 1.0,
+      "has_discrepancy": true
+    },
+    {
+      "internal": {
+        "source": "internal",
+        "record_id": "1030",
+        "reference": "ATX-47001509",
+        "amount": "220.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-27T19:42:05+00:00",
+        "note": "SO-27210"
+      },
+      "provider_tx": {
+        "source": "provider_a",
+        "record_id": "TX-47001509",
+        "reference": "TX-47001509",
+        "amount": "202.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "ABGESCHLOSSEN",
+        "timestamp": "2025-03-27T19:42:45+00:00",
+        "note": ""
+      },
+      "provider": "A",
+      "method": "fuzzy",
+      "confidence": 0.947,
+      "has_discrepancy": true
+    },
+    {
+      "internal": {
+        "source": "internal",
+        "record_id": "1032",
+        "reference": "bpay_f9bae03d8f",
+        "amount": "1480.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-27T22:17:54+00:00",
+        "note": "SO-27224"
+      },
+      "provider_tx": {
+        "source": "provider_b",
+        "record_id": "bpay_f9bae03d8f",
+        "reference": "bpay_f9bae03d8f",
+        "amount": "1480.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "captured",
+        "timestamp": "2025-03-27T22:19:42+00:00",
+        "note": ""
+      },
+      "provider": "B",
+      "method": "exact",
+      "confidence": 1.0,
+      "has_discrepancy": false
+    },
+    {
+      "internal": {
+        "source": "internal",
+        "record_id": "1017",
+        "reference": "ATX-28268772",
+        "amount": "12000.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-28T03:58:12+00:00",
+        "note": "SO-27119"
+      },
+      "provider_tx": {
+        "source": "provider_a",
+        "record_id": "ATX-28268772",
+        "reference": "ATX-28268772",
+        "amount": "1200.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "ABGESCHLOSSEN",
+        "timestamp": "2025-03-28T03:59:04+00:00",
+        "note": ""
+      },
+      "provider": "A",
+      "method": "exact",
+      "confidence": 1.0,
+      "has_discrepancy": true
+    },
+    {
+      "internal": {
+        "source": "internal",
+        "record_id": "1009",
+        "reference": "ATX-13740587",
+        "amount": "999.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "completed",
+        "timestamp": "2025-03-28T05:10:54+00:00",
+        "note": "SO-27063"
+      },
+      "provider_tx": {
+        "source": "provider_a",
+        "record_id": "ATX-13740587",
+        "reference": "ATX-13740587",
+        "amount": "999.00",
+        "currency": "EUR",
+        "status": "COMPLETED",
+        "raw_status": "ABGESCHLOSSEN",
+        "timestamp": "2025-03-28T05:12:04+00:00",
+        "note": ""
+      },
+      "provider": "A",
+      "method": "exact",
+      "confidence": 1.0,
+      "has_discrepancy": false
+    }
+  ],
+  "import_issues": [
+    {
+      "source": "provider_a",
+      "location": "Zeile 4",
+      "severity": "error",
+      "message": "Zeile übersprungen: ungültiger Betrag: 'n/a'",
+      "reference": "ATX-83009462"
+    },
+    {
+      "source": "provider_b",
+      "location": "transactions[3]",
+      "severity": "error",
+      "message": "Eintrag übersprungen: Feld 'id' fehlt",
+      "reference": null
+    },
+    {
+      "source": "provider_b",
+      "location": "transactions[14]",
+      "severity": "warning",
+      "message": "unbekannter Status 'chargeback_initiated' – als UNKNOWN übernommen",
+      "reference": "bpay_82ee6d74f5"
+    }
+  ]
+}

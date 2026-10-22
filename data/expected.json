@@ -1,0 +1,496 @@
+{
+ "matched": [
+  {
+   "internal_id": 1001,
+   "provider_id": "ATX-84860229",
+   "method": "exact"
+  },
+  {
+   "internal_id": 1002,
+   "provider_id": "ATX-74103220",
+   "method": "exact"
+  },
+  {
+   "internal_id": 1003,
+   "provider_id": "ATX-10060049",
+   "method": "exact"
+  },
+  {
+   "internal_id": 1004,
+   "provider_id": "ATX-86465021",
+   "method": "exact"
+  },
+  {
+   "internal_id": 1005,
+   "provider_id": "ATX-61364363",
+   "method": "exact"
+  },
+  {
+   "internal_id": 1006,
+   "provider_id": "ATX-15818526",
+   "method": "exact"
+  },
+  {
+   "internal_id": 1007,
+   "provider_id": "ATX-38394179",
+   "method": "exact"
+  },
+  {
+   "internal_id": 1008,
+   "provider_id": "ATX-65217433",
+   "method": "exact"
+  },
+  {
+   "internal_id": 1009,
+   "provider_id": "ATX-13740587",
+   "method": "exact"
+  },
+  {
+   "internal_id": 1010,
+   "provider_id": "ATX-18968577",
+   "method": "exact"
+  },
+  {
+   "internal_id": 1011,
+   "provider_id": "ATX-35413626",
+   "method": "exact"
+  },
+  {
+   "internal_id": 1012,
+   "provider_id": "ATX-40592523",
+   "method": "exact"
+  },
+  {
+   "internal_id": 1013,
+   "provider_id": "ATX-57576259",
+   "method": "exact"
+  },
+  {
+   "internal_id": 1014,
+   "provider_id": "ATX-89949668",
+   "method": "exact"
+  },
+  {
+   "internal_id": 1015,
+   "provider_id": "ATX-36588931",
+   "method": "exact"
+  },
+  {
+   "internal_id": 1016,
+   "provider_id": "ATX-42675569",
+   "method": "exact"
+  },
+  {
+   "internal_id": 1017,
+   "provider_id": "ATX-28268772",
+   "method": "exact"
+  },
+  {
+   "internal_id": 1018,
+   "provider_id": "ATX-21622603",
+   "method": "exact"
+  },
+  {
+   "internal_id": 1019,
+   "provider_id": "ATX-47281038",
+   "method": "exact"
+  },
+  {
+   "internal_id": 1020,
+   "provider_id": "ATX-87490478",
+   "method": "exact"
+  },
+  {
+   "internal_id": 1021,
+   "provider_id": "ATX-53501687",
+   "method": "exact"
+  },
+  {
+   "internal_id": 1022,
+   "provider_id": "ATX-81349318",
+   "method": "exact"
+  },
+  {
+   "internal_id": 1028,
+   "provider_id": "ATX-54450551",
+   "method": "exact"
+  },
+  {
+   "internal_id": 1029,
+   "provider_id": "ATX-2013397O",
+   "method": "fuzzy"
+  },
+  {
+   "internal_id": 1030,
+   "provider_id": "TX-47001509",
+   "method": "fuzzy"
+  },
+  {
+   "internal_id": 1031,
+   "provider_id": "bpay_a39060ca11",
+   "method": "exact"
+  },
+  {
+   "internal_id": 1032,
+   "provider_id": "bpay_f9bae03d8f",
+   "method": "exact"
+  },
+  {
+   "internal_id": 1033,
+   "provider_id": "bpay_928dda3e06",
+   "method": "exact"
+  },
+  {
+   "internal_id": 1034,
+   "provider_id": "bpay_57d35cae17",
+   "method": "exact"
+  },
+  {
+   "internal_id": 1035,
+   "provider_id": "bpay_810645cae8",
+   "method": "exact"
+  },
+  {
+   "internal_id": 1036,
+   "provider_id": "bpay_3434fc75e9",
+   "method": "exact"
+  },
+  {
+   "internal_id": 1037,
+   "provider_id": "bpay_92dad0400c",
+   "method": "exact"
+  },
+  {
+   "internal_id": 1038,
+   "provider_id": "bpay_9518300ccc",
+   "method": "exact"
+  },
+  {
+   "internal_id": 1039,
+   "provider_id": "bpay_2cf2fad60e",
+   "method": "exact"
+  },
+  {
+   "internal_id": 1040,
+   "provider_id": "bpay_e8ae863265",
+   "method": "exact"
+  },
+  {
+   "internal_id": 1041,
+   "provider_id": "bpay_5dbdcb245d",
+   "method": "exact"
+  },
+  {
+   "internal_id": 1042,
+   "provider_id": "bpay_9a3aad9bb6",
+   "method": "exact"
+  },
+  {
+   "internal_id": 1043,
+   "provider_id": "bpay_82ee6d74f5",
+   "method": "exact"
+  },
+  {
+   "internal_id": 1045,
+   "provider_id": "bpay_84e7808d1c",
+   "method": "exact"
+  },
+  {
+   "internal_id": 1047,
+   "provider_id": "bpay_425720ec4",
+   "method": "fuzzy"
+  }
+ ],
+ "discrepancies": [
+  {
+   "internal_id": 1015,
+   "provider_id": "ATX-36588931",
+   "issues": [
+    "AMOUNT_MISMATCH"
+   ],
+   "impact": {
+    "EUR": "-45.00"
+   },
+   "priority": "LOW"
+  },
+  {
+   "internal_id": 1016,
+   "provider_id": "ATX-42675569",
+   "issues": [
+    "AMOUNT_MISMATCH"
+   ],
+   "impact": {
+    "EUR": "90.00"
+   },
+   "priority": "MEDIUM"
+  },
+  {
+   "internal_id": 1017,
+   "provider_id": "ATX-28268772",
+   "issues": [
+    "AMOUNT_MISMATCH"
+   ],
+   "impact": {
+    "EUR": "-10800.00"
+   },
+   "priority": "HIGH"
+  },
+  {
+   "internal_id": 1018,
+   "provider_id": "ATX-21622603",
+   "issues": [
+    "STATUS_MISMATCH"
+   ],
+   "impact": {
+    "EUR": "-349.90"
+   },
+   "priority": "MEDIUM"
+  },
+  {
+   "internal_id": 1019,
+   "provider_id": "ATX-47281038",
+   "issues": [
+    "STATUS_MISMATCH"
+   ],
+   "impact": {
+    "EUR": "75.00"
+   },
+   "priority": "MEDIUM"
+  },
+  {
+   "internal_id": 1020,
+   "provider_id": "ATX-87490478",
+   "issues": [
+    "STATUS_MISMATCH"
+   ],
+   "impact": {
+    "EUR": "-2500.00"
+   },
+   "priority": "HIGH"
+  },
+  {
+   "internal_id": 1021,
+   "provider_id": "ATX-53501687",
+   "issues": [
+    "STATUS_MISMATCH"
+   ],
+   "impact": {},
+   "priority": "LOW"
+  },
+  {
+   "internal_id": 1022,
+   "provider_id": "ATX-81349318",
+   "issues": [
+    "AMOUNT_MISMATCH",
+    "STATUS_MISMATCH"
+   ],
+   "impact": {
+    "EUR": "-500.00"
+   },
+   "priority": "HIGH"
+  },
+  {
+   "internal_id": 1023,
+   "provider_id": null,
+   "issues": [
+    "MISSING_IN_PROVIDER"
+   ],
+   "impact": {
+    "EUR": "-1800.00"
+   },
+   "priority": "HIGH"
+  },
+  {
+   "internal_id": 1024,
+   "provider_id": null,
+   "issues": [
+    "MISSING_IN_PROVIDER"
+   ],
+   "impact": {
+    "EUR": "-42.00"
+   },
+   "priority": "LOW"
+  },
+  {
+   "internal_id": 1025,
+   "provider_id": null,
+   "issues": [
+    "MISSING_IN_PROVIDER"
+   ],
+   "impact": {},
+   "priority": "LOW"
+  },
+  {
+   "internal_id": 1026,
+   "provider_id": null,
+   "issues": [
+    "MISSING_IN_PROVIDER"
+   ],
+   "impact": {
+    "EUR": "-64.00"
+   },
+   "priority": "MEDIUM"
+  },
+  {
+   "internal_id": 1027,
+   "provider_id": null,
+   "issues": [
+    "MISSING_IN_PROVIDER"
+   ],
+   "impact": {
+    "EUR": "-410.00"
+   },
+   "priority": "MEDIUM"
+  },
+  {
+   "internal_id": null,
+   "provider_id": "ATX-85523351",
+   "issues": [
+    "MISSING_IN_DB"
+   ],
+   "impact": {
+    "EUR": "640.00"
+   },
+   "priority": "HIGH"
+  },
+  {
+   "internal_id": null,
+   "provider_id": "ATX-31598691",
+   "issues": [
+    "MISSING_IN_DB"
+   ],
+   "impact": {
+    "EUR": "19.99"
+   },
+   "priority": "LOW"
+  },
+  {
+   "internal_id": null,
+   "provider_id": "ATX-54450551",
+   "issues": [
+    "DUPLICATE_IN_PROVIDER"
+   ],
+   "impact": {
+    "EUR": "310.00"
+   },
+   "priority": "MEDIUM"
+  },
+  {
+   "internal_id": 1029,
+   "provider_id": "ATX-2013397O",
+   "issues": [
+    "REFERENCE_MISMATCH"
+   ],
+   "impact": {},
+   "priority": "LOW"
+  },
+  {
+   "internal_id": 1030,
+   "provider_id": "TX-47001509",
+   "issues": [
+    "AMOUNT_MISMATCH",
+    "REFERENCE_MISMATCH"
+   ],
+   "impact": {
+    "EUR": "-18.00"
+   },
+   "priority": "LOW"
+  },
+  {
+   "internal_id": 1040,
+   "provider_id": "bpay_e8ae863265",
+   "issues": [
+    "CURRENCY_MISMATCH"
+   ],
+   "impact": {
+    "USD": "200.00",
+    "EUR": "-200.00"
+   },
+   "priority": "HIGH"
+  },
+  {
+   "internal_id": 1041,
+   "provider_id": "bpay_5dbdcb245d",
+   "issues": [
+    "AMOUNT_MISMATCH"
+   ],
+   "impact": {
+    "EUR": "-18.00"
+   },
+   "priority": "LOW"
+  },
+  {
+   "internal_id": 1042,
+   "provider_id": "bpay_9a3aad9bb6",
+   "issues": [
+    "STATUS_MISMATCH"
+   ],
+   "impact": {
+    "EUR": "-1150.00"
+   },
+   "priority": "HIGH"
+  },
+  {
+   "internal_id": 1043,
+   "provider_id": "bpay_82ee6d74f5",
+   "issues": [
+    "STATUS_MISMATCH"
+   ],
+   "impact": {
+    "EUR": "-330.00"
+   },
+   "priority": "MEDIUM"
+  },
+  {
+   "internal_id": 1044,
+   "provider_id": null,
+   "issues": [
+    "MISSING_IN_PROVIDER"
+   ],
+   "impact": {
+    "EUR": "-210.00"
+   },
+   "priority": "MEDIUM"
+  },
+  {
+   "internal_id": null,
+   "provider_id": "bpay_e2028c88e3",
+   "issues": [
+    "MISSING_IN_DB"
+   ],
+   "impact": {
+    "EUR": "88.00"
+   },
+   "priority": "MEDIUM"
+  },
+  {
+   "internal_id": 1046,
+   "provider_id": null,
+   "issues": [
+    "DUPLICATE_IN_DB"
+   ],
+   "impact": {
+    "EUR": "-145.00"
+   },
+   "priority": "MEDIUM"
+  },
+  {
+   "internal_id": 1047,
+   "provider_id": "bpay_425720ec4",
+   "issues": [
+    "REFERENCE_MISMATCH"
+   ],
+   "impact": {},
+   "priority": "LOW"
+  }
+ ],
+ "import_issues": {
+  "errors": 2,
+  "warnings": 1
+ },
+ "counts": {
+  "internal": 47,
+  "provider_a": 29,
+  "provider_b": 17
+ }
+}

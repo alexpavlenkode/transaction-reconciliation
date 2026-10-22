@@ -1,0 +1,4 @@
+* text=auto
+data/* -text
+examples/* -text
+*.db binary

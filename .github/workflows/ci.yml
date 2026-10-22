@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ["3.10", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Unit- und Ende-zu-Ende-Tests
+        run: python -m unittest discover -s tests -t . -v
+      - name: Demo-Lauf (Beispielbericht erzeugen)
+        run: python -m txreconcile --out reports
+      - name: Berichte als Artefakt ablegen
+        if: matrix.os == 'ubuntu-latest' && matrix.python == '3.12'
+        uses: actions/upload-artifact@v4
+        with:
+          name: reconciliation-report
+          path: reports/
