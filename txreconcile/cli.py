@@ -57,10 +57,37 @@ def _currency_threshold(text: str) -> tuple[str, tuple[Decimal, Decimal]]:
             f"erwartet WÄHRUNG=HOCH:MITTEL mit MITTEL <= HOCH, z. B. JPY=75000:7500 (erhalten: {text!r})") from None
 
 
+class _GermanFormatter(argparse.HelpFormatter):
+    def add_usage(self, usage, actions, groups, prefix=None):
+        super().add_usage(usage, actions, groups, "Aufruf: " if prefix is None else prefix)
+
+
+_ARGPARSE_TEXTE = (
+    ("the following arguments are required:", "folgende Argumente fehlen:"),
+    ("unrecognized arguments:", "unbekannte Argumente:"),
+    ("expected one argument", "erwartet einen Wert"),
+    ("invalid choice:", "ungültige Auswahl:"),
+    ("ambiguous option:", "mehrdeutige Option:"),
+    ("not allowed with argument", "nicht kombinierbar mit Argument"),
+)
+
+
+class _GermanParser(argparse.ArgumentParser):
+    """``argparse`` mit deutschen Standardtexten (Aufruf, Fehlermeldungen, Hilfe)."""
+
+    def error(self, message: str):
+        for english, german in _ARGPARSE_TEXTE:
+            message = message.replace(english, german)
+        self.print_usage(sys.stderr)
+        self.exit(2, f"{self.prog}: Fehler: {message}\n")
+
+
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        prog="txreconcile",
+    parser = _GermanParser(
+        prog="txreconcile", add_help=False, formatter_class=_GermanFormatter,
         description="Gleicht interne Buchungen (SQLite) mit den Abrechnungen von Anbieter A (CSV) und B (JSON) ab.")
+    parser.add_argument_group("Allgemein").add_argument(
+        "-h", "--help", action="help", help="diese Hilfe anzeigen und beenden")
     src = parser.add_argument_group("Quellen")
     src.add_argument("--db", default="data/internal.db", help="interne Datenbank (SQLite) [%(default)s]")
     src.add_argument("--provider-a", default="data/provider_a.csv", help="Abrechnung Anbieter A (CSV) [%(default)s]")

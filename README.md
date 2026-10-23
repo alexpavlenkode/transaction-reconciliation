@@ -11,6 +11,32 @@ und erzeugt einen **priorisierten, handlungsorientierten Bericht** (Markdown, HT
 * **113 Tests**, darunter ein Ende-zu-Ende-Test gegen eine unabhängig festgelegte Ground Truth.
 * Reproduzierbar: Stichtag `--as-of` ist Pflicht, der Bericht enthält keine Systemzeit – gleiche Eingabe, gleiche Bytes.
 
+## Kurzfassung (60 Sekunden)
+
+**Aufgabe:** Interne Buchungen (SQLite) mit den Abrechnungen von Anbieter A (CSV) und B (JSON) abgleichen, Abweichungen
+finden, finanzielle Auswirkung berechnen, priorisierten Bericht erzeugen.
+
+**Starten:** `python -m txreconcile --as-of 2025-04-01` (Demo-Daten in `data/`) – Ergebnis in `reports/`, ein fertiges
+Beispiel in [`examples/report.md`](examples/report.md). Tests: `python -m unittest discover -s tests -t .`
+
+**Ergebnis der Demo:** 41 von 49 Buchungen zugeordnet, 28 Abweichungen (7 hoch), berechnete Nettoauswirkung
+−16.583,91 EUR; 7 weitere Fälle haben bewusst *keine* berechnete Auswirkung (siehe Entscheidung 2).
+
+**Die fünf wichtigsten Entscheidungen**
+
+1. **Eine Formel für die Auswirkung:** Anbieter-Betrag minus DB-Betrag je Währung, wobei nur Status *abgeschlossen*
+   als verbucht zählt. Betrag **und** Status am selben Datensatz werden nur einmal gezählt.
+2. **„Nicht bestimmbar“ statt erfundener Zahlen:** unbekannter Status, Duplikate, Währungsabweichungen oder unlesbare
+   Quellzeilen bekommen *keine* Auswirkung, sondern nur den betroffenen Betrag – getrennt ausgewiesen, nie in den Summen.
+3. **Strenge Daten, nie stillschweigend:** Beträge nur als ganze Minor Units, ID-Regeln je Anbieter, Zeiten in UTC mit
+   Pflicht-Stichtag. Übersprungene Zeilen machen das Ergebnis sichtbar **„unvollständig“**.
+4. **Schwere und Sicherheit getrennt:** wie dringend (hoch/mittel/niedrig, Schwellen je Währung, ohne Kurse) ist etwas
+   anderes als wie belastbar die Zahl ist (berechnet/vorläufig/nicht bestimmbar).
+5. **Unscharfe Zuordnung vorsichtig und sichtbar:** nur für Reste, strenge Schwellen, jeder Treffer „zur Bestätigung“.
+
+**Grenzen:** Schnappschuss-Modell (keine Teilerstattungen), Brutto-Beträge, Eingabedateien müssen zum Stichtag passen.
+Details: [Abgleichslogik](#abgleichslogik), [Annahmen](#annahmen-und-bekannte-grenzen), [Skalierbarkeit](#skalierbarkeit).
+
 ## Schnellstart
 
 ```bash
