@@ -4,11 +4,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "txreconcile"
-version = "1.0.0"
+version = "1.1.0"
 description = "Transaktionsabgleich: interne Datenbank vs. Abrechnungen zweier Zahlungsdienstleister"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = []            # bewusst nur Standardbibliothek: nichts zu installieren
+
+[project.optional-dependencies]
+# Nur nötig, wenn CSV-Zeiten in einer Ortszeit (z. B. Europe/Berlin) geliefert werden. Standard ist UTC.
+timezones = ["tzdata; sys_platform == 'win32'"]
 
 [project.scripts]
 txreconcile = "txreconcile.cli:main"

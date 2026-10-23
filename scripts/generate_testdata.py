@@ -3,15 +3,17 @@
 
 Drei Quellen in drei unterschiedlichen Formaten:
 
-* ``internal.db``      – SQLite, interne Buchungen (Beträge als REAL, Zeiten UTC)
-* ``provider_a.csv``   – Zahlungsdienstleister A: CSV, ``;``-getrennt, deutsche
-                         Zahlen- und Datumsformate, deutsche Statuswerte
-* ``provider_b.json``  – Zahlungsdienstleister B: JSON, Beträge in Minor Units
-                         (Cent), ISO-8601-Zeitstempel mit Zeitzonen-Offset
+* ``internal.db``      – SQLite, interne Buchungen (Beträge als INTEGER-Minor-Units in ``amount_minor``,
+                         Zeiten UTC)
+* ``provider_a.csv``   – Zahlungsdienstleister A: CSV, ``;``-getrennt, deutsche Zahlen- und
+                         Datumsformate (UTC), deutsche Statuswerte
+* ``provider_b.json``  – Zahlungsdienstleister B: JSON, Beträge in Minor Units (Cent),
+                         ISO-8601-Zeitstempel mit Zeitzonen-Offset
 
-Zusätzlich wird ``expected.json`` geschrieben: der von Hand festgelegte
-Erwartungswert (Ground Truth) für jede eingebaute Konstellation. Die Tests
-vergleichen das Abgleichsergebnis dagegen – unabhängig von der Implementierung.
+Zusätzlich wird ``expected.json`` geschrieben: der von Hand festgelegte Erwartungswert (Ground Truth) für
+jede eingebaute Konstellation – Befunde, berechnete Auswirkung, betroffener Betrag, Sicherheit und Schwere
+für den Stichtag ``AS_OF``. Die Tests vergleichen das Abgleichsergebnis dagegen, unabhängig von der
+Implementierung.
 
 Aufruf::
 
@@ -35,6 +37,8 @@ STATUS_B = {"COMPLETED": "captured", "PENDING": "pending", "FAILED": "declined",
 EXPONENTS = {"JPY": 0}
 UTC = timezone.utc
 BASE_TIME = datetime(2025, 3, 1, 8, 0, tzinfo=UTC)
+AS_OF = datetime(2025, 4, 1, 0, 0, tzinfo=UTC)          # Stichtag der Testdaten
+SETTLEMENT_LAG_DAYS = 3
 
 CSV_HEADER = ["Transaktions-ID", "Zeitstempel (UTC)", "Betrag", "Waehrung", "Status"]
 
@@ -81,7 +85,7 @@ class Dataset:
         self._next_id += 1
         self.internal.append({
             "id": row_id, "provider": provider, "provider_ref": ref_text,
-            "amount": float(amount), "currency": currency,
+            "amount_minor": int(amount.scaleb(EXPONENTS.get(currency, 2))), "currency": currency,
             "status": STATUS_INTERNAL[status], "created_at": ts.strftime("%Y-%m-%d %H:%M:%S"),
             "order_no": f"SO-{row_id * 7 + 20000}" if order else None,
         })
@@ -112,14 +116,15 @@ class Dataset:
     # -- Szenarien ---------------------------------------------------------
 
     def pair(self, provider, amount, currency="EUR", status="COMPLETED", *, p_amount=None, p_currency=None,
-             p_status=None, p_ref=None, messy=False, issues=(), impact=None, priority=None, method="exact"):
-        """Beide Seiten vorhanden. ``issues``/``impact``/``priority`` = Erwartung."""
+             p_status=None, p_ref=None, messy=False, issues=(), impact=None, priority=None, method="exact",
+             certainty="CALCULATED", affected=None):
+        """Beide Seiten vorhanden. ``issues``/``impact``/``priority``/... = Erwartung."""
         amount = money(amount)
         ref = self.ref(provider)
         ts = self.timestamp()
         ref_text = ref
-        if messy:  # unsaubere interne Schreibweise: Normalisierung muss das auffangen
-            ref_text = f" {ref.lower()} " if provider == "A" else ref.upper()
+        if messy:  # unsaubere interne Schreibweise, die die ID-Regel des Anbieters auffangen muss
+            ref_text = f" {ref.lower()} " if provider == "A" else f" {ref} "
         iid = self.add_internal(provider, ref_text, amount, currency, status, ts)
         provider_ref = p_ref(ref) if p_ref else ref
         self.add_provider(provider, provider_ref, money(p_amount) if p_amount is not None else amount,
@@ -127,28 +132,32 @@ class Dataset:
                           ts + timedelta(seconds=self.rng.randrange(5, 120)))
         self.expected_matched.append({"internal_id": iid, "provider_id": provider_ref, "method": method})
         if issues:
-            self.expect(iid, provider_ref, issues, impact, priority)
+            self.expect(iid, provider_ref, issues, impact, priority, certainty, affected)
         return iid, ref, ts
 
     def internal_only(self, provider, amount, currency="EUR", status="COMPLETED", *, null_ref=False,
-                      ref=None, ts=None, issues=("MISSING_IN_PROVIDER",), impact=None, priority=None):
+                      ref=None, ts=None, issues=("MISSING_IN_PROVIDER",), impact=None, priority=None,
+                      certainty="CALCULATED", affected=None):
         amount = money(amount)
         ref = ref or self.ref(provider)
         iid = self.add_internal(provider, None if null_ref else ref, amount, currency, status, ts or self.timestamp())
-        self.expect(iid, None, issues, impact, priority)
+        self.expect(iid, None, issues, impact, priority, certainty, affected)
         return iid, ref
 
     def provider_only(self, provider, amount, currency="EUR", status="COMPLETED", *, ref=None, ts=None,
-                      issues=("MISSING_IN_DB",), impact=None, priority=None):
+                      issues=("MISSING_IN_DB",), impact=None, priority=None, certainty="CALCULATED",
+                      affected=None):
         ref = ref or self.ref(provider)
         self.add_provider(provider, ref, money(amount), currency, status, ts or self.timestamp())
-        self.expect(None, ref, issues, impact, priority)
+        self.expect(None, ref, issues, impact, priority, certainty, affected)
         return ref
 
-    def expect(self, internal_id, provider_id, issues, impact, priority) -> None:
+    def expect(self, internal_id, provider_id, issues, impact, priority, certainty="CALCULATED",
+               affected=None) -> None:
         self.expected_discrepancies.append({
             "internal_id": internal_id, "provider_id": provider_id,
             "issues": sorted(issues), "impact": impact or {}, "priority": priority,
+            "certainty": certainty, "affected": affected,
         })
 
 
@@ -161,7 +170,7 @@ def corrupt_digit(ref: str) -> str:
 
 
 def build_curated(ds: Dataset) -> None:
-    # ---- Provider A: saubere Treffer (13) ---------------------------------
+    # ---- Provider A: saubere Treffer (14) ---------------------------------
     for idx, amount in enumerate(["49.90", "120.00", "1234.56", "15.00", "89.99",
                                   "560.00", "23.45", "310.75", "999.00", "7.50"]):
         ds.pair("A", amount, messy=idx % 3 == 0)
@@ -171,36 +180,46 @@ def build_curated(ds: Dataset) -> None:
     ds.pair("A", "27.90", status="PENDING")
 
     # ---- Provider A: Betragsabweichungen ----------------------------------
-    ds.pair("A", "1250.00", p_amount="1205.00", issues=["AMOUNT_MISMATCH"],
-            impact={"EUR": "-45.00"}, priority="LOW")                      # Zahlendreher
-    ds.pair("A", "899.00", p_amount="989.00", issues=["AMOUNT_MISMATCH"],
-            impact={"EUR": "90.00"}, priority="MEDIUM")
-    ds.pair("A", "12000.00", p_amount="1200.00", issues=["AMOUNT_MISMATCH"],
-            impact={"EUR": "-10800.00"}, priority="HIGH")                   # Dezimalfehler
+    ds.pair("A", "1250.00", p_amount="1205.00", issues=["AMOUNT_MISMATCH"], impact={"EUR": "-45.00"},
+            priority="LOW", affected={"EUR": "1250.00"})                    # Zahlendreher
+    ds.pair("A", "899.00", p_amount="989.00", issues=["AMOUNT_MISMATCH"], impact={"EUR": "90.00"},
+            priority="MEDIUM", affected={"EUR": "989.00"})
+    ds.pair("A", "12000.00", p_amount="1200.00", issues=["AMOUNT_MISMATCH"], impact={"EUR": "-10800.00"},
+            priority="HIGH", affected={"EUR": "12000.00"})                  # Dezimalfehler
 
     # ---- Provider A: Statusabweichungen -----------------------------------
     ds.pair("A", "349.90", status="COMPLETED", p_status="FAILED", issues=["STATUS_MISMATCH"],
-            impact={"EUR": "-349.90"}, priority="MEDIUM")
+            impact={"EUR": "-349.90"}, priority="MEDIUM", affected={"EUR": "349.90"})
     ds.pair("A", "75.00", status="PENDING", p_status="COMPLETED", issues=["STATUS_MISMATCH"],
-            impact={"EUR": "75.00"}, priority="MEDIUM")
+            impact={"EUR": "75.00"}, priority="MEDIUM", affected={"EUR": "75.00"})
     ds.pair("A", "2500.00", status="COMPLETED", p_status="REFUNDED", issues=["STATUS_MISMATCH"],
-            impact={"EUR": "-2500.00"}, priority="HIGH")
+            impact={"EUR": "-2500.00"}, priority="HIGH", affected={"EUR": "2500.00"})
     ds.pair("A", "33.00", status="PENDING", p_status="FAILED", issues=["STATUS_MISMATCH"],
-            impact={}, priority="LOW")                                      # beide nicht verbucht
+            impact={}, priority="LOW", affected={"EUR": "33.00"})           # beide nicht verbucht: Auswirkung 0
     # Betrag UND Status weichen ab: Auswirkung darf nur einmal gezählt werden
     ds.pair("A", "500.00", status="COMPLETED", p_amount="450.00", p_status="PENDING",
-            issues=["AMOUNT_MISMATCH", "STATUS_MISMATCH"], impact={"EUR": "-500.00"}, priority="HIGH")
+            issues=["AMOUNT_MISMATCH", "STATUS_MISMATCH"], impact={"EUR": "-500.00"}, priority="HIGH",
+            affected={"EUR": "500.00"})
 
-    # ---- Provider A: fehlt in der Abrechnung ------------------------------
+    # ---- Provider A: fehlt in der Abrechnung (Frist abgelaufen) ------------
     p1_ts = ds.timestamp()
-    p1_iid, p1_ref = ds.internal_only("A", "1800.00", ts=p1_ts, impact={"EUR": "-1800.00"}, priority="HIGH")
-    ds.internal_only("A", "42.00", impact={"EUR": "-42.00"}, priority="LOW")
-    ds.internal_only("A", "120.00", status="PENDING", impact={}, priority="LOW")  # vermutlich noch offen
-    ds.internal_only("A", "64.00", null_ref=True, impact={"EUR": "-64.00"}, priority="MEDIUM")
-    # Abrechnungszeile ist unlesbar (Betrag "n/a") -> Importfehler + fehlt in Abrechnung
-    iid, ref = ds.internal_only("A", "410.00", impact={"EUR": "-410.00"}, priority="MEDIUM")
+    p1_iid, p1_ref = ds.internal_only("A", "1800.00", ts=p1_ts, impact={"EUR": "-1800.00"}, priority="HIGH",
+                                      affected={"EUR": "1800.00"})
+    ds.internal_only("A", "42.00", impact={"EUR": "-42.00"}, priority="MEDIUM",   # klein, aber überfällig
+                     affected={"EUR": "42.00"})
+    ds.internal_only("A", "120.00", status="PENDING", impact={}, priority="MEDIUM",  # überfällig, noch offen
+                     affected={"EUR": "120.00"})
+    ds.internal_only("A", "64.00", null_ref=True, impact={"EUR": "-64.00"}, priority="MEDIUM",
+                     affected={"EUR": "64.00"})
+    # Abrechnungszeile ist unlesbar (Betrag "n/a"), aber die ID ist lesbar: NICHT "fehlt", sondern "nicht prüfbar"
+    iid, ref = ds.internal_only("A", "410.00", issues=["SOURCE_ROW_UNREADABLE"], impact={}, priority="MEDIUM",
+                                certainty="UNDEFINED", affected={"EUR": "410.00"})
     ds.add_provider("A", ref, "n/a", "EUR", "COMPLETED", ds.timestamp())
     ds.expected_import["errors"] += 1
+
+    # ---- Provider A: noch nicht fällig (Buchung 31.03., Frist 3 Tage) -----------
+    ds.internal_only("A", "75.00", ts=datetime(2025, 3, 31, 12, 0, tzinfo=UTC), issues=["NOT_YET_DUE"], impact={},
+                     priority="LOW", certainty="UNDEFINED", affected={"EUR": "75.00"})
 
     # ---- Provider A: fehlt in der Datenbank -------------------------------
     # Referenz fast identisch zu p1_ref (letzte Ziffer anders), aber Betrag weit weg:
@@ -208,20 +227,26 @@ def build_curated(ds: Dataset) -> None:
     decoy_ref = p1_ref[:-1] + ("1" if p1_ref[-1] != "1" else "2")
     ds._used_refs.add(decoy_ref)
     ds.provider_only("A", "640.00", ref=decoy_ref, ts=p1_ts + timedelta(hours=2),
-                     impact={"EUR": "640.00"}, priority="HIGH")
-    ds.provider_only("A", "19.99", impact={"EUR": "19.99"}, priority="LOW")
+                     impact={"EUR": "640.00"}, priority="HIGH", affected={"EUR": "640.00"})
+    ds.provider_only("A", "19.99", impact={"EUR": "19.99"}, priority="LOW", affected={"EUR": "19.99"})
 
-    # ---- Provider A: Duplikat in der Abrechnung ---------------------------
+    # ---- Provider A: mehrfach in der Abrechnung: Auswirkung nicht bestimmbar ----------
     iid, ref, ts = ds.pair("A", "310.00")
     ds.add_provider("A", ref, Decimal("310.00"), "EUR", "COMPLETED", ts + timedelta(minutes=3))
-    ds.expect(None, ref, ["DUPLICATE_IN_PROVIDER"], {"EUR": "310.00"}, "MEDIUM")
+    ds.expect(None, ref, ["DUPLICATE_IN_PROVIDER"], {}, "MEDIUM", "UNDEFINED", {"EUR": "310.00"})
+    # Zweiter Eintrag nur nach der Normalisierung gleich (ATX-1 vs. atx1): Duplikat ODER Kollision
+    iid, ref, ts = ds.pair("A", "95.00")
+    variant = ref.lower().replace("-", "")
+    ds.add_provider("A", variant, Decimal("95.00"), "EUR", "COMPLETED", ts + timedelta(minutes=3))
+    ds.expect(None, variant, ["DUPLICATE_IN_PROVIDER", "ID_COLLISION"], {}, "MEDIUM", "UNDEFINED",
+              {"EUR": "95.00"})
 
     # ---- Provider A: unscharfe Zuordnung ----------------------------------
-    ds.pair("A", "180.00", p_ref=corrupt_digit, issues=["REFERENCE_MISMATCH"],
-            impact={}, priority="LOW", method="fuzzy")                      # Tippfehler in der Referenz
+    ds.pair("A", "180.00", p_ref=corrupt_digit, issues=["REFERENCE_MISMATCH"], impact={}, priority="LOW",
+            method="fuzzy", affected={"EUR": "180.00"})                     # Tippfehler in der Referenz
     ds.pair("A", "220.00", p_amount="202.00", p_ref=lambda r: r[1:],         # führendes 'A' fehlt
             issues=["REFERENCE_MISMATCH", "AMOUNT_MISMATCH"], impact={"EUR": "-18.00"},
-            priority="LOW", method="fuzzy")
+            priority="LOW", method="fuzzy", affected={"EUR": "220.00"})
 
     # ---- Provider B: saubere Treffer (9) ----------------------------------
     for idx, amount in enumerate(["35.00", "1480.00", "56.20", "210.50", "9.99", "775.00"]):
@@ -231,27 +256,31 @@ def build_curated(ds: Dataset) -> None:
     ds.pair("B", "129.00", status="REFUNDED")
 
     # ---- Provider B: Abweichungen -----------------------------------------
-    ds.pair("B", "200.00", currency="EUR", p_currency="USD", issues=["CURRENCY_MISMATCH"],
-            impact={"USD": "200.00", "EUR": "-200.00"}, priority="HIGH")
-    ds.pair("B", "75.50", p_amount="57.50", issues=["AMOUNT_MISMATCH"],
-            impact={"EUR": "-18.00"}, priority="LOW")
-    ds.pair("B", "1150.00", p_status="FAILED", issues=["STATUS_MISMATCH"],
-            impact={"EUR": "-1150.00"}, priority="HIGH")
-    ds.pair("B", "330.00", p_status="chargeback_initiated", issues=["STATUS_MISMATCH"],
-            impact={"EUR": "-330.00"}, priority="MEDIUM")                    # unbekannter Status
+    # Währung: keine Subtraktion, kein Kurs -> Auswirkung nicht bestimmbar, beide Beträge werden ausgewiesen
+    ds.pair("B", "200.00", currency="EUR", p_currency="USD", issues=["CURRENCY_MISMATCH"], impact={},
+            priority="HIGH", certainty="UNDEFINED", affected={"EUR": "200.00", "USD": "200.00"})
+    ds.pair("B", "75.50", p_amount="57.50", issues=["AMOUNT_MISMATCH"], impact={"EUR": "-18.00"},
+            priority="LOW", affected={"EUR": "75.50"})
+    ds.pair("B", "1150.00", p_status="FAILED", issues=["STATUS_MISMATCH"], impact={"EUR": "-1150.00"},
+            priority="HIGH", affected={"EUR": "1150.00"})
+    # Unbekannter Status: NICHT 0, sondern nicht bestimmt -> keine erfundene Abweichung in den Summen
+    ds.pair("B", "330.00", p_status="chargeback_initiated", issues=["STATUS_MISMATCH"], impact={},
+            priority="MEDIUM", certainty="UNDEFINED", affected={"EUR": "330.00"})
     ds.expected_import["warnings"] += 1
-    ds.internal_only("B", "210.00", impact={"EUR": "-210.00"}, priority="MEDIUM")
-    ds.provider_only("B", "88.00", impact={"EUR": "88.00"}, priority="MEDIUM")
+    # B enthält unten einen Datensatz ohne lesbare ID -> "fehlt in Abrechnung" bei B ist nur vorläufig
+    ds.internal_only("B", "210.00", impact={"EUR": "-210.00"}, priority="MEDIUM", certainty="PRELIMINARY",
+                     affected={"EUR": "210.00"})
+    ds.provider_only("B", "88.00", impact={"EUR": "88.00"}, priority="MEDIUM", affected={"EUR": "88.00"})
 
-    # Doppelbuchung in der Datenbank (zweite Buchung 5 Min. später)
+    # Mehrfach in der Datenbank (zweite Buchung 5 Min. später): Doppelbuchung oder Doppelzeile? nicht bestimmbar
     iid, ref, ts = ds.pair("B", "145.00")
     dup_id = ds.add_internal("B", ref, Decimal("145.00"), "EUR", "COMPLETED", ts + timedelta(minutes=5))
-    ds.expect(dup_id, None, ["DUPLICATE_IN_DB"], {"EUR": "-145.00"}, "MEDIUM")
+    ds.expect(dup_id, None, ["DUPLICATE_IN_DB"], {}, "MEDIUM", "UNDEFINED", {"EUR": "145.00"})
 
-    ds.pair("B", "62.00", p_ref=lambda r: r[:8] + r[9:], issues=["REFERENCE_MISMATCH"],
-            impact={}, priority="LOW", method="fuzzy")                      # ein Zeichen fehlt
+    ds.pair("B", "62.00", p_ref=lambda r: r[:8] + r[9:], issues=["REFERENCE_MISMATCH"], impact={},
+            priority="LOW", method="fuzzy", affected={"EUR": "62.00"})      # ein Zeichen fehlt
 
-    # Datensatz ohne ID -> nicht abgleichbar, Importfehler
+    # Datensatz ohne ID -> nicht abgleichbar, Importfehler ohne lesbare Referenz
     ds.rows_b.append({"created": "2025-03-12T10:00:00+02:00",
                       "amount": {"minor": 1234, "currency": "EUR"}, "state": "captured"})
     ds.expected_import["errors"] += 1
@@ -267,38 +296,41 @@ def build_bulk(ds: Dataset, count: int) -> None:
             ds.pair(provider, amount, messy=ds.rng.random() < 0.2)
         elif roll < 0.955:
             ds.pair(provider, amount, p_amount=amount + Decimal("1.00"),
-                    issues=["AMOUNT_MISMATCH"], impact={"EUR": "1.00"}, priority="LOW")
+                    issues=["AMOUNT_MISMATCH"], impact={"EUR": "1.00"})
         elif roll < 0.97:
             ds.pair(provider, amount, p_status="FAILED", issues=["STATUS_MISMATCH"],
-                    impact={"EUR": f"{-amount:.2f}"}, priority=None)
+                    impact={"EUR": f"{-amount:.2f}"})
         elif roll < 0.985:
-            ds.internal_only(provider, amount, impact={"EUR": f"{-amount:.2f}"}, priority=None)
+            ds.internal_only(provider, amount, impact={"EUR": f"{-amount:.2f}"})
         else:
-            ds.provider_only(provider, amount, impact={"EUR": f"{amount:.2f}"}, priority=None)
+            ds.provider_only(provider, amount, impact={"EUR": f"{amount:.2f}"})
 
 
 # ---- Ausgabe ---------------------------------------------------------------
 
 def write_sqlite(path: Path, rows: list[dict]) -> None:
     path.unlink(missing_ok=True)
-    with sqlite3.connect(path) as conn:
-        conn.executescript("""
-            CREATE TABLE transactions (
-                id           INTEGER PRIMARY KEY,
-                provider     TEXT NOT NULL CHECK (provider IN ('A', 'B')),
-                provider_ref TEXT,
-                amount       REAL NOT NULL,
-                currency     TEXT NOT NULL,
-                status       TEXT NOT NULL,
-                created_at   TEXT NOT NULL,
-                order_no     TEXT
-            );
-            CREATE INDEX idx_transactions_ref ON transactions (provider, provider_ref);
-        """)
-        conn.executemany(
-            "INSERT INTO transactions VALUES (:id, :provider, :provider_ref, :amount, :currency,"
-            " :status, :created_at, :order_no)", rows)
-    conn.close()
+    conn = sqlite3.connect(path)
+    try:
+        with conn:
+            conn.executescript("""
+                CREATE TABLE transactions (
+                    id           INTEGER PRIMARY KEY,
+                    provider     TEXT NOT NULL CHECK (provider IN ('A', 'B')),
+                    provider_ref TEXT,
+                    amount_minor INTEGER NOT NULL,          -- Minor Units (Cent); JPY: Yen
+                    currency     TEXT NOT NULL,
+                    status       TEXT NOT NULL,
+                    created_at   TEXT NOT NULL,             -- UTC, 'YYYY-MM-DD HH:MM:SS'
+                    order_no     TEXT
+                );
+                CREATE INDEX idx_transactions_ref ON transactions (provider, provider_ref);
+            """)
+            conn.executemany(
+                "INSERT INTO transactions VALUES (:id, :provider, :provider_ref, :amount_minor, :currency,"
+                " :status, :created_at, :order_no)", rows)
+    finally:
+        conn.close()
 
 
 def write_csv(path: Path, rows: list[dict]) -> None:
@@ -330,6 +362,8 @@ def generate(out: Path, seed: int = 2025, curated: bool = True, bulk: int = 0) -
     write_json(out / "provider_b.json", {"provider": "B", "exported_at": "2025-04-01T00:00:00+02:00",
                                          "transactions": ds.rows_b})
     write_json(out / "expected.json", {
+        "as_of": AS_OF.isoformat(),
+        "settlement_lag_days": SETTLEMENT_LAG_DAYS,
         "matched": ds.expected_matched,
         "discrepancies": ds.expected_discrepancies,
         "import_issues": ds.expected_import,

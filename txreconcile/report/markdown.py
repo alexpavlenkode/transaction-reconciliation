@@ -3,13 +3,10 @@ from __future__ import annotations
 
 from decimal import Decimal
 
-from ..formatting import (KIND_LABELS, PRIORITY_ICONS, PRIORITY_LABELS, STATUS_LABELS, fmt_impact, fmt_money,
-                          fmt_number)
-from ..models import Discrepancy, IssueKind, Priority, Transaction
+from ..formatting import (CERTAINTY_LABELS, KIND_LABELS, PRIORITY_ICONS, PRIORITY_LABELS, STATUS_LABELS,
+                          fmt_amounts, fmt_effect, fmt_impact, fmt_money, fmt_number, fmt_time)
+from ..models import Certainty, Discrepancy, Priority, Transaction
 from ..reconcile import ReconciliationResult
-
-_UNMATCHED_KINDS = {IssueKind.MISSING_IN_PROVIDER, IssueKind.MISSING_IN_DB,
-                    IssueKind.DUPLICATE_IN_DB, IssueKind.DUPLICATE_IN_PROVIDER}
 
 
 def _cell(text: object) -> str:
@@ -28,26 +25,43 @@ def _tx(tx: Transaction | None) -> str:
     return f"{fmt_money(tx.amount, tx.currency)} · {STATUS_LABELS[tx.status]}"
 
 
-def _impact_cells(totals: dict[str, Decimal], signed: bool = True) -> str:
-    return fmt_impact(totals, signed)
+def _thresholds_text(result: ReconciliationResult) -> str:
+    c = result.config
+    text = f"Standard {fmt_number(c.high_threshold)} / {fmt_number(c.medium_threshold)}"
+    extra = ", ".join(f"{cur} {fmt_number(h, cur)} / {fmt_number(m, cur)}"
+                      for cur, (h, m) in sorted(c.currency_thresholds.items()))
+    return f"{text}; {extra}" if extra else text
 
 
 def render_markdown(result: ReconciliationResult) -> str:
     s = result.summary
+    c = result.config
     out: list[str] = []
     add = out.append
 
     add("# Transaktionsabgleich – Bericht\n")
-    add(f"*Erstellt am {result.generated_at:%d.%m.%Y %H:%M} UTC · Quellen: "
-        + ", ".join(f"`{src.path.replace(chr(92), '/').split('/')[-1]}`" for src in result.sources) + "*\n")
+    add(f"*Stichtag: **{fmt_time(c.as_of) + ' UTC' if c.as_of else 'nicht gesetzt (keine Fälligkeitsprüfung)'}** · "
+        f"Frist: {c.settlement_lag.days} Tage · Quellen: "
+        + ", ".join(f"`{src.path.split('/')[-1]}`" for src in result.sources) + "*\n")
+    if result.incomplete:
+        add("> ⚠️ **Ergebnis unvollständig.** " + "; ".join(result.incomplete_reasons) + ". "
+            "Zeilen mit lesbarer Referenz sind als „nicht prüfbar“ markiert; wo keine Referenz lesbar war, sind "
+            "alle „fehlt“-Befunde der betroffenen Quelle **vorläufig** (siehe Abschnitt 5).\n")
 
     # ---- 1. Zusammenfassung ---------------------------------------------------
     high = s.by_priority.get(Priority.HIGH, 0)
     add("## 1. Zusammenfassung\n")
     add(f"**{s.matched} Paare zugeordnet** ({s.exact} exakt, {s.fuzzy} unscharf), davon {s.clean_matches} ohne "
         f"Abweichung. **{s.discrepancy_count} Abweichungen**, davon **{high} mit hoher Priorität**. "
-        f"Nettoauswirkung (Abrechnung − Datenbank): **{_impact_cells(s.net_impact)}**; "
-        f"Bruttovolumen der Abweichungen: {_impact_cells(s.gross_impact, signed=False)}.\n")
+        f"Berechnete Nettoauswirkung (Abrechnung − Datenbank): **{fmt_impact(s.net_impact)}**; "
+        f"Bruttovolumen: {fmt_impact(s.gross_impact, signed=False)}.")
+    if s.undefined_count:
+        add(f"\n**{s.undefined_count} Befunde ohne bestimmbare Auswirkung** (betroffener Betrag "
+            f"{fmt_amounts(s.undefined_affected)}) sind **nicht** in diesen Summen enthalten – sie brauchen "
+            f"eine Klärung (Duplikat, Währung, unbekannter Status, unlesbare Quellzeile, noch nicht fällig).")
+    if s.preliminary_count:
+        add(f"\n{s.preliminary_count} Befunde sind **vorläufig** (in den Summen enthalten, können sich aber ändern).")
+    add("\n> Die Summen beschreiben Abweichungen **zwischen den Daten**, keinen nachgewiesenen Verlust.\n")
 
     add("### Kennzahlen\n")
     add(_table(["Kennzahl", "Wert"], [
@@ -58,8 +72,10 @@ def render_markdown(result: ReconciliationResult) -> str:
         ["Davon fehlerfrei (ohne Abweichung)", f"{s.clean_matches} ({s.clean_rate:.1%})".replace(".", ",")],
         ["Nur in Datenbank (fehlt in Abrechnung)", s.unmatched_internal],
         ["Nur in Abrechnung (fehlt in Datenbank)", s.unmatched_provider],
-        ["Duplikate (überzählige Einträge)", s.duplicates],
+        ["Überzählige Einträge (Duplikate)", s.duplicates],
         ["Abweichungen gesamt", s.discrepancy_count],
+        ["Davon Auswirkung berechnet / vorläufig / nicht bestimmbar",
+         f"{s.by_certainty.get(Certainty.CALCULATED, 0)} / {s.preliminary_count} / {s.undefined_count}"],
         ["Importprobleme (Zeilen übersprungen / Warnungen)",
          f"{sum(len(x.errors) for x in result.sources)} / {sum(len(x.warnings) for x in result.sources)}"],
     ]))
@@ -67,36 +83,43 @@ def render_markdown(result: ReconciliationResult) -> str:
     add("\n### Nach Anbieter\n")
     add(_table(
         ["Anbieter", "DB", "Abrechnung", "Zugeordnet", "Nur DB", "Nur Abrechnung", "Duplikate", "Abweichungen",
-         "Auswirkung"],
+         "Berechnete Auswirkung", "Nicht bestimmbar"],
         [[p.provider, p.internal_total, p.provider_total, p.matched, p.missing_in_provider, p.missing_in_db,
-          p.duplicates, p.discrepancies, _impact_cells(p.impact)] for p in s.providers]))
+          p.duplicates, p.discrepancies, fmt_impact(p.impact),
+          f"{p.undefined} (betroffen: {fmt_amounts(p.affected_undefined)})" if p.undefined else "—"]
+         for p in s.providers]))
 
     add("\n### Abweichungen nach Hauptbefund\n")
     add("Jede Abweichung wird genau einmal gezählt (Hauptbefund = schwerster Einzelbefund); "
         "ein Datensatz kann zusätzliche Nebenbefunde haben.\n")
-    add(_table(["Befund", "Anzahl", "Auswirkung (Abrechnung − DB)"],
-               [[KIND_LABELS[kind], st.count, _impact_cells(st.impact)] for kind, st in s.by_kind.items()]))
+    add(_table(["Befund", "Anzahl", "Berechnete Auswirkung (Abrechnung − DB)", "Nicht bestimmbar"],
+               [[KIND_LABELS[kind], st.count, fmt_impact(st.impact),
+                 f"{st.undefined} (betroffen: {fmt_amounts(st.affected_undefined)})" if st.undefined else "—"]
+                for kind, st in s.by_kind.items()]))
 
-    add("\n### Nach Priorität\n")
+    add("\n### Nach Priorität (Schwere)\n")
+    add(f"Schwellen je Währung (hoch / mittel): {_thresholds_text(result)}. Maßgeblich ist die berechnete "
+        "Auswirkung, bei nicht bestimmbarer Auswirkung der betroffene Betrag. Währungskonflikte sind immer hoch; "
+        "überfällige „fehlt“-Befunde mindestens mittel.\n")
     add(_table(["Priorität", "Anzahl", "Bedeutung"], [
         [f"{PRIORITY_ICONS[p]} {PRIORITY_LABELS[p]}", s.by_priority.get(p, 0), meaning] for p, meaning in (
-            (Priority.HIGH, f"Auswirkung ≥ {fmt_number(result.config.high_threshold)} EUR oder Währungskonflikt – "
-                            "sofort klären"),
-            (Priority.MEDIUM, f"Auswirkung ≥ {fmt_number(result.config.medium_threshold)} EUR – zeitnah klären"),
-            (Priority.LOW, "geringe oder keine finanzielle Wirkung – im Regelprozess prüfen"))]))
+            (Priority.HIGH, "sofort klären"),
+            (Priority.MEDIUM, "zeitnah klären"),
+            (Priority.LOW, "geringe oder keine Wirkung – im Regelprozess prüfen"))]))
 
     # ---- 2. Priorisierte Abweichungen -------------------------------------------
     numbers = {id(d): n for n, d in enumerate(result.discrepancies, 1)}
     add("\n## 2. Priorisierte Abweichungen\n")
-    add("Sortiert nach Priorität, dann nach absoluter finanzieller Auswirkung. "
-        "Die Nummern (D-xxx) sind in `discrepancies.csv` und `report.json` identisch.\n")
+    add("Sortiert nach Priorität, dann nach Größe (relativ zur Schwelle der Währung). Die Nummern (D-xxx) sind in "
+        "`discrepancies.csv` und `report.json` identisch. *Sicherheit* sagt, wie belastbar die Auswirkung ist, "
+        "unabhängig von der Priorität.\n")
     for priority in (Priority.HIGH, Priority.MEDIUM, Priority.LOW):
         items = [d for d in result.discrepancies if d.priority is priority]
         if not items:
             continue
         add(f"### {PRIORITY_ICONS[priority]} Priorität {PRIORITY_LABELS[priority]} ({len(items)})\n")
         add(_table(["Nr.", "Befund", "Anbieter", "DB-ID", "Anbieter-ID", "Datenbank", "Anbieter", "Auswirkung",
-                    "Empfohlene Maßnahme"],
+                    "Sicherheit", "Empfohlene Maßnahme"],
                    [_discrepancy_row(numbers[id(d)], d) for d in items]))
         add("")
 
@@ -104,15 +127,15 @@ def render_markdown(result: ReconciliationResult) -> str:
     only_db = [d for d in result.discrepancies if d.internal and not d.provider]
     only_provider = [d for d in result.discrepancies if d.provider and not d.internal]
     add("## 3. Nicht zugeordnete Transaktionen\n")
-    add(f"### 3.1 Nur in der Datenbank – fehlt in der Abrechnung ({len(only_db)})\n")
+    add(f"### 3.1 Nur in der Datenbank ({len(only_db)})\n")
     add(_unmatched_table(only_db, numbers, "internal") if only_db else "_Keine._")
-    add(f"\n### 3.2 Nur in der Abrechnung – fehlt in der Datenbank ({len(only_provider)})\n")
+    add(f"\n### 3.2 Nur in der Abrechnung ({len(only_provider)})\n")
     add(_unmatched_table(only_provider, numbers, "provider") if only_provider else "_Keine._")
 
     # ---- 4. Zugeordnete Transaktionen --------------------------------------------
     flagged = result.flagged_matches
     matches = result.sorted_matches()
-    limit = result.config.max_matched_rows
+    limit = c.max_matched_rows
     add(f"\n## 4. Zugeordnete Transaktionen ({len(matches)})\n")
     rows = []
     for m in matches[:limit]:
@@ -141,10 +164,11 @@ def render_markdown(result: ReconciliationResult) -> str:
         add("_Keine._")
 
     # ---- 6. Methodik -------------------------------------------------------------------
-    c = result.config
     add("\n## 6. Methodik und Annahmen\n")
-    add("- **Zuordnung exakt:** gleicher Anbieter und gleiche Referenz nach Normalisierung "
-        "(Groß-/Kleinschreibung, Leerzeichen und Sonderzeichen werden ignoriert).")
+    add("- **Modell:** Die Quellen sind Zustands-Schnappschüsse einer Transaktion (kein Ereignisjournal); "
+        "verglichen werden Brutto-Beträge.")
+    add("- **Zuordnung exakt:** gleicher Anbieter und gleiche Referenz nach der ID-Regel des Anbieters "
+        "(A: ohne Groß-/Kleinschreibung und Trennzeichen, B: exakt). Rohwerte bleiben erhalten.")
     if c.fuzzy_enabled:
         add(f"- **Zuordnung unscharf** (nur für Reste): gleicher Anbieter und Währung, Zeitfenster "
             f"±{c.fuzzy_time_window.days} Tage, Referenz-Ähnlichkeit ≥ {c.fuzzy_min_ref_similarity:.0%} "
@@ -153,11 +177,13 @@ def render_markdown(result: ReconciliationResult) -> str:
             "Solche Paare erscheinen immer als „Unscharfe Zuordnung“ zur Bestätigung.")
     else:
         add("- **Unscharfe Zuordnung:** deaktiviert.")
-    add("- **Finanzielle Auswirkung** = verbuchter Betrag Anbieter − verbuchter Betrag Datenbank, je Währung; "
-        "verbucht ist nur der Status *abgeschlossen*. Währungen werden nicht verrechnet.")
-    add(f"- **Priorität:** Hoch ab {fmt_number(c.high_threshold)} EUR, Mittel ab {fmt_number(c.medium_threshold)} EUR "
-        "(Umrechnung nur für die Priorisierung mit statischen Kursen); Währungskonflikte immer hoch.")
-    add(f"- **Betragstoleranz:** {fmt_number(c.amount_tolerance)} (Beträge werden als Dezimalzahlen verglichen, nie als Fließkommazahl).")
+    add("- **Verbuchter Betrag:** abgeschlossen = Betrag; ausstehend, fehlgeschlagen, erstattet = 0; "
+        "unbekannter Status = **nicht bestimmt** (keine Auswirkung).")
+    add("- **Auswirkung** = verbuchter Betrag Anbieter − verbuchter Betrag Datenbank, je Währung, ohne Umrechnung. "
+        "Nicht bestimmbar bei Duplikaten, ID-Kollisionen, Währungsabweichung, unbekanntem Status, unlesbarer "
+        "Quellzeile und Buchungen innerhalb der Frist – dort wird nur der betroffene Betrag ausgewiesen.")
+    add(f"- **Fälligkeit:** überfällig, wenn Stichtag > Buchungszeit + {c.settlement_lag.days} Tage; Zeiten sind UTC.")
+    add(f"- **Betragstoleranz:** {fmt_number(c.amount_tolerance)} (Dezimalvergleich, nie Fließkomma).")
     return "\n".join(out) + "\n"
 
 
@@ -167,7 +193,7 @@ def _discrepancy_row(number: int, item: Discrepancy) -> list[object]:
         f"D-{number:03d}", f"**{labels}**<br>{item.description}", item.provider_code,
         item.internal.record_id if item.internal else "—",
         item.provider.record_id if item.provider else "—",
-        _tx(item.internal), _tx(item.provider), fmt_impact(item.impact), item.action,
+        _tx(item.internal), _tx(item.provider), fmt_effect(item), CERTAINTY_LABELS[item.certainty], item.action,
     ]
 
 
@@ -180,7 +206,7 @@ def _unmatched_table(items: list[Discrepancy], numbers: dict[int, int], side: st
             f"D-{numbers[id(d)]:03d}", f"{PRIORITY_ICONS[d.priority]} {PRIORITY_LABELS[d.priority]}",
             tx.provider, tx.record_id, tx.reference or "—", fmt_money(tx.amount, tx.currency),
             STATUS_LABELS[tx.status], tx.timestamp.strftime("%d.%m.%Y %H:%M"),
-            extra, ", ".join(KIND_LABELS[k] for k in d.kinds), fmt_impact(d.impact),
+            extra, ", ".join(KIND_LABELS[k] for k in d.kinds), fmt_effect(d),
         ])
     return _table(["Nr.", "Priorität", "Anbieter", "ID", "Referenz", "Betrag", "Status", "Zeitpunkt",
                    "Bestellung", "Befund", "Auswirkung"], rows)

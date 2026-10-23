@@ -62,12 +62,15 @@ input { min-width: 240px; }
 .desc { max-width: 460px; } .action { color: var(--muted); font-size: 12px; margin-top: 3px; }
 details { margin-top: 12px; } summary { cursor: pointer; font-weight: 600; }
 code { font-size: 12px; }
+.banner { margin-top: 14px; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--med);
+          background: var(--med-bg); color: var(--text); }
 </style>
 </head>
 <body>
 <main>
   <h1>Transaktionsabgleich</h1>
   <div class="muted" id="meta"></div>
+  <div id="banner"></div>
   <div class="cards" id="cards"></div>
 
   <h2>Übersicht</h2>
@@ -110,12 +113,21 @@ const impactHtml = imp => {
   return parts.length ? parts.join('<br>') : '<span class="muted">±0</span>';
 };
 const txText = t => t ? `${esc(money(t.amount, t.currency))}<br><span class="muted">${STATUS[t.status] || t.status}</span>` : '<span class="muted">—</span>';
-const worth = imp => Math.max(0, ...Object.values(imp).map(v => Math.abs(Number(v))));
+const worth = d => Math.max(0, ...Object.values(d.effect_defined ? d.impact : d.affected).map(v => Math.abs(Number(v))));
 const sumText = imp => Object.keys(imp).length ? Object.entries(imp).map(([c, v]) => money(v, c, true)).join(' / ') : '±0';
+const plain = amounts => Object.entries(amounts).map(([c, v]) => money(v, c, false)).join(' / ') || '—';
+// Ohne bestimmbare Auswirkung steht hier der betroffene Betrag – bewusst NICHT als Plus/Minus-Zahl.
+const effectHtml = d => d.effect_defined
+  ? impactHtml(d.impact) + (d.certainty === 'PRELIMINARY' ? '<br><span class="muted">vorläufig</span>' : '')
+  : `<span class="muted">nicht bestimmbar</span><br><span class="muted">betroffen: ${esc(plain(d.affected))}</span>`;
 
 const S = D.summary;
-$('meta').textContent = `Erstellt am ${new Date(D.generated_at).toLocaleString('de-DE')} · Quellen: ` +
+$('meta').textContent = `Stichtag: ${D.as_of ? new Date(D.as_of).toLocaleString('de-DE', {timeZone: 'UTC'}) + ' UTC' : 'nicht gesetzt'} · Quellen: ` +
   D.sources.map(s => s.path.split(/[\\/]/).pop()).join(', ');
+if (D.incomplete) {
+  $('banner').innerHTML = `<div class="banner"><strong>Ergebnis unvollständig.</strong> ${esc(D.incomplete_reasons.join('; '))}. ` +
+    'Zeilen mit lesbarer Referenz sind als „nicht prüfbar“ markiert; ohne lesbare Referenz sind alle „fehlt“-Befunde der Quelle vorläufig.</div>';
+}
 
 const cards = [
   ['Zuordnungsquote', (S.match_rate * 100).toFixed(1).replace('.', ',') + ' %', `${S.matched} Paare (${S.matched_exact} exakt, ${S.matched_fuzzy} unscharf)`],
@@ -123,8 +135,8 @@ const cards = [
   ['Priorität hoch', S.by_priority.HIGH || 0, `${S.by_priority.MEDIUM || 0} mittel · ${S.by_priority.LOW || 0} niedrig`],
   ['Nur in Datenbank', S.unmatched_internal, 'fehlt in Abrechnung'],
   ['Nur in Abrechnung', S.unmatched_provider, 'fehlt in Datenbank'],
-  ['Duplikate', S.duplicates, 'überzählige Einträge'],
-  ['Nettoauswirkung', sumText(S.net_impact), 'Abrechnung − Datenbank'],
+  ['Nicht bestimmbar', S.undefined_count, 'betroffen: ' + plain(S.undefined_affected) + ' (nicht in der Summe)'],
+  ['Berechnete Nettoauswirkung', sumText(S.net_impact), 'Abrechnung − Datenbank, ohne nicht bestimmbare Befunde'],
 ];
 $('cards').innerHTML = cards.map(([l, v, s]) =>
   `<div class="card"><div class="label">${l}</div><div class="value" style="font-size:${String(v).length > 12 ? 17 : 26}px">${esc(v)}</div><div class="sub">${esc(s)}</div></div>`).join('');
@@ -137,10 +149,11 @@ $('kindbars').innerHTML = kinds.map(([k, v]) =>
   `<div class="barrow"><span>${esc(labels[k] || k)}</span><div class="bar" style="width:${100 * v.count / maxCount}%"></div><b>${v.count}</b></div>`).join('')
   || '<p class="muted">Keine Abweichungen.</p>';
 
-$('providers').innerHTML = '<tr><th>Anbieter</th><th>DB</th><th>Abr.</th><th>Zugeordnet</th><th>Nur DB</th><th>Nur Abr.</th><th>Abw.</th><th>Auswirkung</th></tr>' +
+$('providers').innerHTML = '<tr><th>Anbieter</th><th>DB</th><th>Abr.</th><th>Zugeordnet</th><th>Nur DB</th><th>Nur Abr.</th><th>Abw.</th><th>Auswirkung (berechnet)</th><th>Nicht bestimmbar</th></tr>' +
   S.providers.map(p => `<tr><td>${p.provider}</td><td class="num">${p.internal_total}</td><td class="num">${p.provider_total}</td>` +
     `<td class="num">${p.matched}</td><td class="num">${p.missing_in_provider}</td><td class="num">${p.missing_in_db}</td>` +
-    `<td class="num">${p.discrepancies}</td><td class="num">${impactHtml(p.impact)}</td></tr>`).join('');
+    `<td class="num">${p.discrepancies}</td><td class="num">${impactHtml(p.impact)}</td>` +
+    `<td class="num">${p.undefined ? p.undefined + '<br><span class="muted">' + esc(plain(p.affected_undefined)) + '</span>' : '—'}</td></tr>`).join('');
 
 // ---- Filter und Sortierung der Abweichungen ----
 const fill = (id, entries) => entries.forEach(([v, t]) => $(id).insertAdjacentHTML('beforeend', `<option value="${esc(v)}">${esc(t)}</option>`));
@@ -148,8 +161,8 @@ fill('fPrio', Object.entries(PRIO));
 fill('fKind', Object.entries(labels));
 fill('fProv', [...new Set(D.discrepancies.map(d => d.provider))].sort().map(p => [p, 'Anbieter ' + p]));
 let sort = {key: 'id', dir: 1};
-const keyFns = {id: d => d.id, prio: d => RANK[d.priority], impact: d => -worth(d.impact)};
-const heads = [['id', 'Nr.'], ['prio', 'Priorität'], [null, 'Befund'], [null, 'Anbieter'], [null, 'Datenbank'], [null, 'Abrechnung'], ['impact', 'Auswirkung'], [null, 'Beschreibung / Maßnahme']];
+const keyFns = {id: d => d.id, prio: d => RANK[d.priority], impact: d => -worth(d)};
+const heads = [['id', 'Nr.'], ['prio', 'Priorität'], [null, 'Befund'], [null, 'Anbieter'], [null, 'Datenbank'], [null, 'Abrechnung'], ['impact', 'Auswirkung'], [null, 'Sicherheit'], [null, 'Beschreibung / Maßnahme']];
 
 function renderDisc() {
   const q = $('fText').value.trim().toLowerCase();
@@ -166,7 +179,7 @@ function renderDisc() {
       `<td>${d.kind_labels.map(esc).join('<br>')}</td><td>${d.provider}</td>` +
       `<td>${d.internal ? `<code>${esc(d.internal.record_id)}</code><br>` : ''}${txText(d.internal)}</td>` +
       `<td>${d.provider_tx ? `<code>${esc(d.provider_tx.record_id)}</code><br>` : ''}${txText(d.provider_tx)}</td>` +
-      `<td class="num">${impactHtml(d.impact)}</td>` +
+      `<td class="num">${effectHtml(d)}</td><td>${esc(d.certainty_label)}</td>` +
       `<td class="desc">${esc(d.description)}<div class="action">→ ${esc(d.action)}</div></td></tr>`).join('');
   document.querySelectorAll('#disc th.sortable').forEach(th => th.onclick = () => {
     sort = {key: th.dataset.k, dir: sort.key === th.dataset.k ? -sort.dir : 1}; renderDisc();

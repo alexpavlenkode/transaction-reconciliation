@@ -17,10 +17,15 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
+      - name: Zeitzonen-Datenbank (nur für die Zeitzonen-Tests; unter Windows nötig)
+        run: python -m pip install tzdata
       - name: Unit- und Ende-zu-Ende-Tests
         run: python -m unittest discover -s tests -t . -v
       - name: Demo-Lauf (Beispielbericht erzeugen)
-        run: python -m txreconcile --out reports
+        run: python -m txreconcile --as-of 2025-04-01 --out reports
+      - name: Beispielbericht ist reproduzierbar (identisch zu examples/)
+        run: python -m txreconcile --as-of 2025-04-01 --out reports --quiet && git diff --no-index --exit-code examples reports
+        if: matrix.os == 'ubuntu-latest'
       - name: Berichte als Artefakt ablegen
         if: matrix.os == 'ubuntu-latest' && matrix.python == '3.12'
         uses: actions/upload-artifact@v4

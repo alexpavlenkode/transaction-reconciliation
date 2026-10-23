@@ -1,4 +1,6 @@
 {
+ "as_of": "2025-04-01T00:00:00+00:00",
+ "settlement_lag_days": 3,
  "matched": [
   {
    "internal_id": 1001,
@@ -111,93 +113,98 @@
    "method": "exact"
   },
   {
-   "internal_id": 1028,
-   "provider_id": "ATX-54450551",
-   "method": "exact"
-  },
-  {
    "internal_id": 1029,
-   "provider_id": "ATX-2013397O",
-   "method": "fuzzy"
+   "provider_id": "ATX-49497139",
+   "method": "exact"
   },
   {
    "internal_id": 1030,
-   "provider_id": "TX-47001509",
-   "method": "fuzzy"
+   "provider_id": "ATX-84860779",
+   "method": "exact"
   },
   {
    "internal_id": 1031,
-   "provider_id": "bpay_a39060ca11",
-   "method": "exact"
+   "provider_id": "ATX-4700150O",
+   "method": "fuzzy"
   },
   {
    "internal_id": 1032,
-   "provider_id": "bpay_f9bae03d8f",
-   "method": "exact"
+   "provider_id": "TX-85695696",
+   "method": "fuzzy"
   },
   {
    "internal_id": 1033,
-   "provider_id": "bpay_928dda3e06",
+   "provider_id": "bpay_e859ddeb38",
    "method": "exact"
   },
   {
    "internal_id": 1034,
-   "provider_id": "bpay_57d35cae17",
+   "provider_id": "bpay_928dda3e06",
    "method": "exact"
   },
   {
    "internal_id": 1035,
-   "provider_id": "bpay_810645cae8",
+   "provider_id": "bpay_57d35cae17",
    "method": "exact"
   },
   {
    "internal_id": 1036,
-   "provider_id": "bpay_3434fc75e9",
+   "provider_id": "bpay_810645cae8",
    "method": "exact"
   },
   {
    "internal_id": 1037,
-   "provider_id": "bpay_92dad0400c",
+   "provider_id": "bpay_3434fc75e9",
    "method": "exact"
   },
   {
    "internal_id": 1038,
-   "provider_id": "bpay_9518300ccc",
+   "provider_id": "bpay_92dad0400c",
    "method": "exact"
   },
   {
    "internal_id": 1039,
-   "provider_id": "bpay_2cf2fad60e",
+   "provider_id": "bpay_9518300ccc",
    "method": "exact"
   },
   {
    "internal_id": 1040,
-   "provider_id": "bpay_e8ae863265",
+   "provider_id": "bpay_2cf2fad60e",
    "method": "exact"
   },
   {
    "internal_id": 1041,
-   "provider_id": "bpay_5dbdcb245d",
+   "provider_id": "bpay_e8ae863265",
    "method": "exact"
   },
   {
    "internal_id": 1042,
-   "provider_id": "bpay_9a3aad9bb6",
+   "provider_id": "bpay_5dbdcb245d",
    "method": "exact"
   },
   {
    "internal_id": 1043,
+   "provider_id": "bpay_9a3aad9bb6",
+   "method": "exact"
+  },
+  {
+   "internal_id": 1044,
    "provider_id": "bpay_82ee6d74f5",
    "method": "exact"
   },
   {
    "internal_id": 1045,
-   "provider_id": "bpay_84e7808d1c",
+   "provider_id": "bpay_cc50b8a435",
    "method": "exact"
   },
   {
    "internal_id": 1047,
-   "provider_id": "bpay_425720ec4",
+   "provider_id": "bpay_f44286b855",
+   "method": "exact"
+  },
+  {
+   "internal_id": 1049,
+   "provider_id": "bpay_748d856c7",
    "method": "fuzzy"
   }
  ],
@@ -211,7 +218,11 @@
    "impact": {
     "EUR": "-45.00"
    },
-   "priority": "LOW"
+   "priority": "LOW",
+   "certainty": "CALCULATED",
+   "affected": {
+    "EUR": "1250.00"
+   }
   },
   {
    "internal_id": 1016,
@@ -222,7 +233,11 @@
    "impact": {
     "EUR": "90.00"
    },
-   "priority": "MEDIUM"
+   "priority": "MEDIUM",
+   "certainty": "CALCULATED",
+   "affected": {
+    "EUR": "989.00"
+   }
   },
   {
    "internal_id": 1017,
@@ -233,7 +248,11 @@
    "impact": {
     "EUR": "-10800.00"
    },
-   "priority": "HIGH"
+   "priority": "HIGH",
+   "certainty": "CALCULATED",
+   "affected": {
+    "EUR": "12000.00"
+   }
   },
   {
    "internal_id": 1018,
@@ -244,7 +263,11 @@
    "impact": {
     "EUR": "-349.90"
    },
-   "priority": "MEDIUM"
+   "priority": "MEDIUM",
+   "certainty": "CALCULATED",
+   "affected": {
+    "EUR": "349.90"
+   }
   },
   {
    "internal_id": 1019,
@@ -255,7 +278,11 @@
    "impact": {
     "EUR": "75.00"
    },
-   "priority": "MEDIUM"
+   "priority": "MEDIUM",
+   "certainty": "CALCULATED",
+   "affected": {
+    "EUR": "75.00"
+   }
   },
   {
    "internal_id": 1020,
@@ -266,7 +293,11 @@
    "impact": {
     "EUR": "-2500.00"
    },
-   "priority": "HIGH"
+   "priority": "HIGH",
+   "certainty": "CALCULATED",
+   "affected": {
+    "EUR": "2500.00"
+   }
   },
   {
    "internal_id": 1021,
@@ -275,7 +306,11 @@
     "STATUS_MISMATCH"
    ],
    "impact": {},
-   "priority": "LOW"
+   "priority": "LOW",
+   "certainty": "CALCULATED",
+   "affected": {
+    "EUR": "33.00"
+   }
   },
   {
    "internal_id": 1022,
@@ -287,7 +322,11 @@
    "impact": {
     "EUR": "-500.00"
    },
-   "priority": "HIGH"
+   "priority": "HIGH",
+   "certainty": "CALCULATED",
+   "affected": {
+    "EUR": "500.00"
+   }
   },
   {
    "internal_id": 1023,
@@ -298,7 +337,11 @@
    "impact": {
     "EUR": "-1800.00"
    },
-   "priority": "HIGH"
+   "priority": "HIGH",
+   "certainty": "CALCULATED",
+   "affected": {
+    "EUR": "1800.00"
+   }
   },
   {
    "internal_id": 1024,
@@ -309,7 +352,11 @@
    "impact": {
     "EUR": "-42.00"
    },
-   "priority": "LOW"
+   "priority": "MEDIUM",
+   "certainty": "CALCULATED",
+   "affected": {
+    "EUR": "42.00"
+   }
   },
   {
    "internal_id": 1025,
@@ -318,7 +365,11 @@
     "MISSING_IN_PROVIDER"
    ],
    "impact": {},
-   "priority": "LOW"
+   "priority": "MEDIUM",
+   "certainty": "CALCULATED",
+   "affected": {
+    "EUR": "120.00"
+   }
   },
   {
    "internal_id": 1026,
@@ -329,18 +380,37 @@
    "impact": {
     "EUR": "-64.00"
    },
-   "priority": "MEDIUM"
+   "priority": "MEDIUM",
+   "certainty": "CALCULATED",
+   "affected": {
+    "EUR": "64.00"
+   }
   },
   {
    "internal_id": 1027,
    "provider_id": null,
    "issues": [
-    "MISSING_IN_PROVIDER"
+    "SOURCE_ROW_UNREADABLE"
    ],
-   "impact": {
-    "EUR": "-410.00"
-   },
-   "priority": "MEDIUM"
+   "impact": {},
+   "priority": "MEDIUM",
+   "certainty": "UNDEFINED",
+   "affected": {
+    "EUR": "410.00"
+   }
+  },
+  {
+   "internal_id": 1028,
+   "provider_id": null,
+   "issues": [
+    "NOT_YET_DUE"
+   ],
+   "impact": {},
+   "priority": "LOW",
+   "certainty": "UNDEFINED",
+   "affected": {
+    "EUR": "75.00"
+   }
   },
   {
    "internal_id": null,
@@ -351,42 +421,70 @@
    "impact": {
     "EUR": "640.00"
    },
-   "priority": "HIGH"
+   "priority": "HIGH",
+   "certainty": "CALCULATED",
+   "affected": {
+    "EUR": "640.00"
+   }
   },
   {
    "internal_id": null,
-   "provider_id": "ATX-31598691",
+   "provider_id": "ATX-47573247",
    "issues": [
     "MISSING_IN_DB"
    ],
    "impact": {
     "EUR": "19.99"
    },
-   "priority": "LOW"
+   "priority": "LOW",
+   "certainty": "CALCULATED",
+   "affected": {
+    "EUR": "19.99"
+   }
   },
   {
    "internal_id": null,
-   "provider_id": "ATX-54450551",
+   "provider_id": "ATX-49497139",
    "issues": [
     "DUPLICATE_IN_PROVIDER"
    ],
-   "impact": {
+   "impact": {},
+   "priority": "MEDIUM",
+   "certainty": "UNDEFINED",
+   "affected": {
     "EUR": "310.00"
-   },
-   "priority": "MEDIUM"
+   }
   },
   {
-   "internal_id": 1029,
-   "provider_id": "ATX-2013397O",
+   "internal_id": null,
+   "provider_id": "atx84860779",
+   "issues": [
+    "DUPLICATE_IN_PROVIDER",
+    "ID_COLLISION"
+   ],
+   "impact": {},
+   "priority": "MEDIUM",
+   "certainty": "UNDEFINED",
+   "affected": {
+    "EUR": "95.00"
+   }
+  },
+  {
+   "internal_id": 1031,
+   "provider_id": "ATX-4700150O",
    "issues": [
     "REFERENCE_MISMATCH"
    ],
    "impact": {},
-   "priority": "LOW"
+   "priority": "LOW",
+   "certainty": "CALCULATED",
+   "affected": {
+    "EUR": "180.00"
+   }
   },
   {
-   "internal_id": 1030,
-   "provider_id": "TX-47001509",
+   "internal_id": 1032,
+   "provider_id": "TX-85695696",
    "issues": [
     "AMOUNT_MISMATCH",
     "REFERENCE_MISMATCH"
@@ -394,55 +492,71 @@
    "impact": {
     "EUR": "-18.00"
    },
-   "priority": "LOW"
+   "priority": "LOW",
+   "certainty": "CALCULATED",
+   "affected": {
+    "EUR": "220.00"
+   }
   },
   {
-   "internal_id": 1040,
-   "provider_id": "bpay_e8ae863265",
+   "internal_id": 1042,
+   "provider_id": "bpay_5dbdcb245d",
    "issues": [
     "CURRENCY_MISMATCH"
    ],
-   "impact": {
-    "USD": "200.00",
-    "EUR": "-200.00"
-   },
-   "priority": "HIGH"
+   "impact": {},
+   "priority": "HIGH",
+   "certainty": "UNDEFINED",
+   "affected": {
+    "EUR": "200.00",
+    "USD": "200.00"
+   }
   },
   {
-   "internal_id": 1041,
-   "provider_id": "bpay_5dbdcb245d",
+   "internal_id": 1043,
+   "provider_id": "bpay_9a3aad9bb6",
    "issues": [
     "AMOUNT_MISMATCH"
    ],
    "impact": {
     "EUR": "-18.00"
    },
-   "priority": "LOW"
+   "priority": "LOW",
+   "certainty": "CALCULATED",
+   "affected": {
+    "EUR": "75.50"
+   }
   },
   {
-   "internal_id": 1042,
-   "provider_id": "bpay_9a3aad9bb6",
+   "internal_id": 1044,
+   "provider_id": "bpay_82ee6d74f5",
    "issues": [
     "STATUS_MISMATCH"
    ],
    "impact": {
     "EUR": "-1150.00"
    },
-   "priority": "HIGH"
+   "priority": "HIGH",
+   "certainty": "CALCULATED",
+   "affected": {
+    "EUR": "1150.00"
+   }
   },
   {
-   "internal_id": 1043,
-   "provider_id": "bpay_82ee6d74f5",
+   "internal_id": 1045,
+   "provider_id": "bpay_cc50b8a435",
    "issues": [
     "STATUS_MISMATCH"
    ],
-   "impact": {
-    "EUR": "-330.00"
-   },
-   "priority": "MEDIUM"
+   "impact": {},
+   "priority": "MEDIUM",
+   "certainty": "UNDEFINED",
+   "affected": {
+    "EUR": "330.00"
+   }
   },
   {
-   "internal_id": 1044,
+   "internal_id": 1046,
    "provider_id": null,
    "issues": [
     "MISSING_IN_PROVIDER"
@@ -450,38 +564,52 @@
    "impact": {
     "EUR": "-210.00"
    },
-   "priority": "MEDIUM"
+   "priority": "MEDIUM",
+   "certainty": "PRELIMINARY",
+   "affected": {
+    "EUR": "210.00"
+   }
   },
   {
    "internal_id": null,
-   "provider_id": "bpay_e2028c88e3",
+   "provider_id": "bpay_5e5b78866a",
    "issues": [
     "MISSING_IN_DB"
    ],
    "impact": {
     "EUR": "88.00"
    },
-   "priority": "MEDIUM"
+   "priority": "MEDIUM",
+   "certainty": "CALCULATED",
+   "affected": {
+    "EUR": "88.00"
+   }
   },
   {
-   "internal_id": 1046,
+   "internal_id": 1048,
    "provider_id": null,
    "issues": [
     "DUPLICATE_IN_DB"
    ],
-   "impact": {
-    "EUR": "-145.00"
-   },
-   "priority": "MEDIUM"
+   "impact": {},
+   "priority": "MEDIUM",
+   "certainty": "UNDEFINED",
+   "affected": {
+    "EUR": "145.00"
+   }
   },
   {
-   "internal_id": 1047,
-   "provider_id": "bpay_425720ec4",
+   "internal_id": 1049,
+   "provider_id": "bpay_748d856c7",
    "issues": [
     "REFERENCE_MISMATCH"
    ],
    "impact": {},
-   "priority": "LOW"
+   "priority": "LOW",
+   "certainty": "CALCULATED",
+   "affected": {
+    "EUR": "62.00"
+   }
   }
  ],
  "import_issues": {
@@ -489,8 +617,8 @@
   "warnings": 1
  },
  "counts": {
-  "internal": 47,
-  "provider_a": 29,
+  "internal": 49,
+  "provider_a": 31,
   "provider_b": 17
  }
 }

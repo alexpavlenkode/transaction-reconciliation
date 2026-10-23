@@ -91,13 +91,15 @@ def _pair_group(internal_items: list[Transaction], provider_items: list[Transact
     """
     if len(internal_items) == 1 and len(provider_items) == 1:
         return [(internal_items[0], provider_items[0])], [], []
+    # Bei Gleichstand entscheiden die IDs (nicht die Eingabereihenfolge): das Ergebnis ist unabhängig davon,
+    # in welcher Reihenfolge die Zeilen geliefert werden.
     costs = sorted(
-        (_pair_cost(i, p), ii, pi)
+        (_pair_cost(i, p), i.record_id, p.record_id, i.timestamp, p.timestamp, ii, pi)
         for ii, i in enumerate(internal_items) for pi, p in enumerate(provider_items))
     used_i: set[int] = set()
     used_p: set[int] = set()
     pairs = []
-    for _, ii, pi in costs:
+    for *_, ii, pi in costs:
         if ii in used_i or pi in used_p:
             continue
         used_i.add(ii)
@@ -161,7 +163,7 @@ def _match_fuzzy(unmatched_internal: list[Transaction], unmatched_provider: list
         stamps[block_key] = [moment for moment, _ in block]
 
     window = config.fuzzy_time_window
-    candidates: list[tuple[float, int, int, float]] = []
+    candidates: list[tuple[float, str, str, int, int]] = []
     for ii, internal in enumerate(unmatched_internal):
         block_key = (internal.provider, internal.currency)
         if not internal.key or block_key not in blocks:
@@ -175,13 +177,13 @@ def _match_fuzzy(unmatched_internal: list[Transaction], unmatched_provider: list
         for _, pi in blocks[block_key][lo:hi]:
             scored = _score(matcher, internal, unmatched_provider[pi], config)
             if scored:
-                candidates.append((-scored[0], ii, pi, scored[1]))
+                candidates.append((-scored[0], internal.record_id, unmatched_provider[pi].record_id, ii, pi))
 
-    candidates.sort()                         # bester Score zuerst, danach Indizes -> deterministisch
+    candidates.sort()                         # bester Score zuerst, danach IDs -> unabhängig von der Eingabereihenfolge
     used_i: set[int] = set()
     used_p: set[int] = set()
     matches: list[Match] = []
-    for neg_score, ii, pi, _ in candidates:
+    for neg_score, _, _, ii, pi in candidates:
         if ii in used_i or pi in used_p:
             continue
         used_i.add(ii)

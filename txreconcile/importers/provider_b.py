@@ -7,6 +7,8 @@ Beispiel::
        "amount": {"minor": 123456, "currency": "EUR"}, "state": "captured"}
     ]}
 
+``amount.minor`` muss eine JSON-Ganzzahl sein (kein ``1234.0``, kein Text).
+
 Hinweis zur Skalierung: ``json.load`` lädt die Datei komplett. Für sehr große Exporte wäre
 JSON Lines oder ein Streaming-Parser (z. B. ``ijson``) der nächste Schritt (siehe README).
 """
@@ -16,7 +18,7 @@ import json
 from pathlib import Path
 
 from ..models import Status, Transaction
-from ..normalize import normalize_currency, parse_iso_timestamp, parse_minor_units
+from ..normalize import ID_RULES, IdRule, normalize_currency, normalize_reference, parse_iso_timestamp, parse_minor_units
 from .base import ImportIssue, ImportResult, Importer, SourceError, map_status
 
 STATUS_MAP = {
@@ -30,6 +32,9 @@ STATUS_MAP = {
 class ProviderBJsonImporter(Importer):
     source = "provider_b"
     provider = "B"
+
+    def __init__(self, id_rule: IdRule | None = None) -> None:
+        self.id_rule = id_rule or ID_RULES["B"]
 
     def read(self, path: str | Path) -> ImportResult:
         file = self.check_file(path)
@@ -49,10 +54,12 @@ class ProviderBJsonImporter(Importer):
 
     def _read_record(self, record: object, location: str, result: ImportResult) -> None:
         ref = None
+        key = ""
         try:
             if not isinstance(record, dict):
                 raise ValueError("Eintrag ist kein Objekt")
             ref = str(record["id"]).strip() if record.get("id") not in (None, "") else None
+            key = normalize_reference(ref, self.id_rule)
             if ref is None:
                 raise ValueError("Feld 'id' fehlt")
             amount = record.get("amount")
@@ -64,11 +71,12 @@ class ProviderBJsonImporter(Importer):
                 source=self.source, provider="B", record_id=ref, reference=ref,
                 amount=parse_minor_units(amount["minor"], currency), currency=currency,
                 status=status, timestamp=parse_iso_timestamp(record.get("created")),
-                raw_status=str(record.get("state", "")),
+                raw_status=str(record.get("state", "")), key=key,
             )
         except ValueError as exc:
-            result.issues.append(ImportIssue(self.source, location, "error", f"Eintrag übersprungen: {exc}", ref))
+            result.issues.append(ImportIssue(self.source, location, "error", f"Eintrag übersprungen: {exc}",
+                                             ref, "B", key))
             return
         if warning:
-            result.issues.append(ImportIssue(self.source, location, "warning", warning, ref))
+            result.issues.append(ImportIssue(self.source, location, "warning", warning, ref, "B", key))
         result.transactions.append(tx)

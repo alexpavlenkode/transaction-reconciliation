@@ -1,4 +1,8 @@
-"""Maschinenlesbare Ausgaben (JSON, CSV) – dieselbe Datenbasis speist auch das HTML-Dashboard."""
+"""Maschinenlesbare Ausgaben (JSON, CSV) – dieselbe Datenbasis speist auch das HTML-Dashboard.
+
+Der Inhalt hängt nur von Eingabedaten und Konfiguration ab (kein Erzeugungszeitpunkt): derselbe Lauf
+liefert byte-identische Dateien.
+"""
 from __future__ import annotations
 
 import csv
@@ -6,7 +10,7 @@ import json
 from decimal import Decimal
 from pathlib import Path
 
-from ..formatting import KIND_LABELS, PRIORITY_LABELS
+from ..formatting import CERTAINTY_LABELS, KIND_LABELS, PRIORITY_LABELS
 from ..models import Discrepancy, Transaction
 from ..reconcile import ReconciliationResult
 
@@ -15,8 +19,8 @@ def _money(value: Decimal) -> str:
     return format(value, "f")
 
 
-def impact_to_dict(impact: dict[str, Decimal]) -> dict[str, str]:
-    return {currency: _money(value) for currency, value in sorted(impact.items())}
+def amounts_to_dict(amounts: dict[str, Decimal]) -> dict[str, str]:
+    return {currency: _money(value) for currency, value in sorted(amounts.items())}
 
 
 def tx_to_dict(tx: Transaction | None) -> dict | None:
@@ -34,12 +38,16 @@ def discrepancy_to_dict(number: int, item: Discrepancy) -> dict:
         "id": f"D-{number:03d}",
         "priority": item.priority.value,
         "priority_label": PRIORITY_LABELS[item.priority],
+        "certainty": item.certainty.value,
+        "certainty_label": CERTAINTY_LABELS[item.certainty],
         "kinds": [kind.value for kind in item.kinds],
         "kind_labels": [KIND_LABELS[kind] for kind in item.kinds],
         "provider": item.provider_code,
         "internal": tx_to_dict(item.internal),
         "provider_tx": tx_to_dict(item.provider),
-        "impact": impact_to_dict(item.impact),
+        "effect_defined": item.effect_defined,
+        "impact": amounts_to_dict(item.impact),          # leer, wenn nicht bestimmbar oder null
+        "affected": amounts_to_dict(item.affected),      # betroffener Betrag – nie Teil der Summen
         "description": item.description,
         "action": item.action,
         "match_method": item.match.method if item.match and item.internal and item.provider else None,
@@ -53,16 +61,20 @@ def result_to_dict(result: ReconciliationResult, matched_limit: int | None = Non
     flagged = result.flagged_matches
     config = result.config
     return {
-        "generated_at": result.generated_at.isoformat(timespec="seconds"),
+        "as_of": config.as_of.isoformat(timespec="seconds") if config.as_of else None,
+        "incomplete": result.incomplete,
+        "incomplete_reasons": result.incomplete_reasons,
         "config": {
+            "settlement_lag_days": config.settlement_lag.total_seconds() / 86400,
             "amount_tolerance": _money(config.amount_tolerance),
             "fuzzy_enabled": config.fuzzy_enabled,
             "fuzzy_time_window_days": config.fuzzy_time_window.total_seconds() / 86400,
             "fuzzy_min_ref_similarity": config.fuzzy_min_ref_similarity,
             "fuzzy_min_ref_similarity_if_amount_differs": config.fuzzy_min_ref_similarity_if_amount_differs,
             "fuzzy_min_score": config.fuzzy_min_score,
-            "high_threshold_eur": _money(config.high_threshold),
-            "medium_threshold_eur": _money(config.medium_threshold),
+            "default_thresholds": {"high": _money(config.high_threshold), "medium": _money(config.medium_threshold)},
+            "currency_thresholds": {c: {"high": _money(h), "medium": _money(m)}
+                                    for c, (h, m) in sorted(config.currency_thresholds.items())},
         },
         "sources": [{
             "source": s.source, "path": s.path, "rows_read": s.rows_read,
@@ -76,15 +88,22 @@ def result_to_dict(result: ReconciliationResult, matched_limit: int | None = Non
             "clean_matches": summary.clean_matches,
             "match_rate": round(summary.match_rate, 4), "clean_rate": round(summary.clean_rate, 4),
             "by_priority": {p.value: n for p, n in summary.by_priority.items()},
-            "by_kind": {k.value: {"count": s.count, "impact": impact_to_dict(s.impact)}
+            "by_certainty": {c.value: n for c, n in summary.by_certainty.items()},
+            "by_kind": {k.value: {"count": s.count, "impact": amounts_to_dict(s.impact),
+                                  "undefined": s.undefined,
+                                  "affected_undefined": amounts_to_dict(s.affected_undefined)}
                         for k, s in summary.by_kind.items()},
-            "net_impact": impact_to_dict(summary.net_impact),
-            "gross_impact": impact_to_dict(summary.gross_impact),
+            "net_impact": amounts_to_dict(summary.net_impact),
+            "gross_impact": amounts_to_dict(summary.gross_impact),
+            "undefined_count": summary.undefined_count,
+            "undefined_affected": amounts_to_dict(summary.undefined_affected),
+            "preliminary_count": summary.preliminary_count,
             "providers": [{
                 "provider": p.provider, "internal_total": p.internal_total, "provider_total": p.provider_total,
                 "matched": p.matched, "exact": p.exact, "fuzzy": p.fuzzy,
                 "missing_in_provider": p.missing_in_provider, "missing_in_db": p.missing_in_db,
-                "duplicates": p.duplicates, "discrepancies": p.discrepancies, "impact": impact_to_dict(p.impact),
+                "duplicates": p.duplicates, "discrepancies": p.discrepancies, "impact": amounts_to_dict(p.impact),
+                "undefined": p.undefined, "affected_undefined": amounts_to_dict(p.affected_undefined),
             } for p in summary.providers],
         },
         "discrepancies": [discrepancy_to_dict(n, d) for n, d in enumerate(result.discrepancies, 1)],
@@ -106,14 +125,14 @@ def write_json(result: ReconciliationResult, path: Path) -> None:
         json.dump(result_to_dict(result), handle, indent=2, ensure_ascii=False)
 
 
-def _impact_text(impact: dict[str, str]) -> str:
-    return "; ".join(f"{currency}:{value}" for currency, value in impact.items())
+def _amounts_text(amounts: dict[str, str]) -> str:
+    return "; ".join(f"{currency}:{value}" for currency, value in amounts.items())
 
 
 def write_discrepancies_csv(result: ReconciliationResult, path: Path) -> None:
-    header = ["id", "priority", "kinds", "provider", "db_id", "db_reference", "db_amount", "db_currency",
-              "db_status", "db_time", "provider_id", "provider_amount", "provider_currency",
-              "provider_status", "provider_time", "impact", "description", "action"]
+    header = ["id", "priority", "certainty", "kinds", "provider", "db_id", "db_reference", "db_amount",
+              "db_currency", "db_status", "db_time", "provider_id", "provider_amount", "provider_currency",
+              "provider_status", "provider_time", "impact", "affected", "description", "action"]
     with path.open("w", newline="", encoding="utf-8-sig") as handle:      # BOM: Excel erkennt UTF-8
         writer = csv.writer(handle)
         writer.writerow(header)
@@ -121,12 +140,13 @@ def write_discrepancies_csv(result: ReconciliationResult, path: Path) -> None:
             row = discrepancy_to_dict(number, item)
             db, pv = row["internal"] or {}, row["provider_tx"] or {}
             writer.writerow([
-                row["id"], row["priority"], "|".join(row["kinds"]), row["provider"],
+                row["id"], row["priority"], row["certainty"], "|".join(row["kinds"]), row["provider"],
                 db.get("record_id", ""), db.get("reference") or "", db.get("amount", ""), db.get("currency", ""),
                 db.get("status", ""), db.get("timestamp", ""),
                 pv.get("record_id", ""), pv.get("amount", ""), pv.get("currency", ""),
                 pv.get("status", ""), pv.get("timestamp", ""),
-                _impact_text(row["impact"]), row["description"], row["action"],
+                # leer = nicht bestimmbar bzw. null; Unterscheidung über die Spalte "certainty"
+                _amounts_text(row["impact"]), _amounts_text(row["affected"]), row["description"], row["action"],
             ])
 
 

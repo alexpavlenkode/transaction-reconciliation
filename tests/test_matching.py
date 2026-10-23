@@ -1,10 +1,13 @@
+import random
 import unittest
 from datetime import timedelta
+from decimal import Decimal
 
-from tests.helpers import internal, provider
+from tests.helpers import T0, internal, provider
 from txreconcile.config import ReconcileConfig
 from txreconcile.matching import match_transactions
-from txreconcile.models import Status
+from txreconcile.models import Status, Transaction
+from txreconcile.normalize import ID_RULES, normalize_reference
 
 
 def run(internals, providers, **cfg):
@@ -54,6 +57,41 @@ class ExactMatchingTests(unittest.TestCase):
         result = run(internals, providers)
         self.assertEqual(len({m.internal.record_id for m in result.matches}), 20)
         self.assertEqual(len({m.provider.record_id for m in result.matches}), 20)
+
+
+class IdRuleTests(unittest.TestCase):
+    """Die Schlüssel bildet der Importer nach der ID-Regel des Anbieters; das Matching vergleicht nur Schlüssel."""
+
+    def test_case_sensitive_provider_does_not_merge_ids_that_differ_only_in_case(self):
+        rule = ID_RULES["B"]
+        db = Transaction(source="internal", provider="B", record_id="1", reference="BPAY_X", amount=Decimal("5"),
+                         currency="EUR", status=Status.COMPLETED, timestamp=T0, key=normalize_reference("BPAY_X", rule))
+        prov = Transaction(source="provider_b", provider="B", record_id="bpay_x", reference="bpay_x",
+                           amount=Decimal("5"), currency="EUR", status=Status.COMPLETED, timestamp=T0,
+                           key=normalize_reference("bpay_x", rule))
+        result = run([db], [prov], fuzzy_enabled=False)
+        self.assertEqual(result.matches, [])                       # exakte Regel: BPAY_X ist nicht bpay_x
+        self.assertEqual((len(result.unmatched_internal), len(result.unmatched_provider)), (1, 1))
+
+    def test_case_insensitive_provider_merges_them(self):
+        result = run([internal("1", "atx-1 ")], [provider("ATX1")], fuzzy_enabled=False)
+        self.assertEqual(len(result.matches), 1)
+
+
+class OrderIndependenceTests(unittest.TestCase):
+    def test_matching_does_not_depend_on_input_order(self):
+        internals = [internal(str(i), f"REF{i % 4}", "100.00", minutes=i) for i in range(12)]
+        providers = [provider(f"REF{i % 4}", "100.00", minutes=i * 2) for i in range(10)]
+        baseline = run(internals, providers)
+        pairs = lambda r: sorted((m.internal.record_id, m.provider.timestamp.isoformat()) for m in r.matches)
+        for seed in range(5):
+            shuffled_i, shuffled_p = internals[:], providers[:]
+            random.Random(seed).shuffle(shuffled_i)
+            random.Random(seed + 100).shuffle(shuffled_p)
+            again = run(shuffled_i, shuffled_p)
+            self.assertEqual(pairs(again), pairs(baseline))
+            self.assertEqual(sorted(t.record_id for t, _ in again.duplicate_internal),
+                             sorted(t.record_id for t, _ in baseline.duplicate_internal))
 
 
 class FuzzyMatchingTests(unittest.TestCase):

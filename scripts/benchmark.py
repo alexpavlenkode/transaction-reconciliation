@@ -17,8 +17,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from scripts.generate_testdata import generate  # noqa: E402
-from tests.helpers import diff_with_expected, load_expected  # noqa: E402
-from txreconcile import ReconcileConfig  # noqa: E402
+from tests.helpers import config_for, diff_with_expected, load_expected  # noqa: E402
 from txreconcile.discrepancies import find_discrepancies  # noqa: E402
 from txreconcile.importers import InternalDbImporter, ProviderACsvImporter, ProviderBJsonImporter  # noqa: E402
 from txreconcile.matching import match_transactions  # noqa: E402
@@ -30,7 +29,8 @@ def run(size: int) -> None:
     with tempfile.TemporaryDirectory() as tmp:
         out = Path(tmp)
         generate(out, seed=1, curated=False, bulk=size)
-        config = ReconcileConfig()
+        expected = load_expected(out / "expected.json")
+        config = config_for(expected)
 
         t0 = time.perf_counter()
         internal = InternalDbImporter().read(out / "internal.db")
@@ -51,7 +51,7 @@ def run(size: int) -> None:
         write_reports(result, out / "reports")
         t_report = time.perf_counter() - t0
 
-        problems = diff_with_expected(result, load_expected(out / "expected.json"), check_priority=False)
+        problems = diff_with_expected(result, expected, check_priority=False)
         total = t_import + t_match + t_disc
 
         # Speicher separat messen: tracemalloc bremst stark und würde die Zeiten oben verfälschen.

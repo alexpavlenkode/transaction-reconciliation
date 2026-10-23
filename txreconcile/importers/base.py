@@ -15,7 +15,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from ..models import Status, Transaction
-from ..normalize import normalize_reference
 
 
 class SourceError(Exception):
@@ -24,15 +23,20 @@ class SourceError(Exception):
 
 @dataclass(frozen=True)
 class ImportIssue:
+    """Eine Meldung beim Einlesen.
+
+    Konnte bei einer fehlerhaften Zeile noch die Referenz gelesen werden (``key`` gesetzt), lässt sich der
+    Datensatz der Gegenseite als "nicht prüfbar" kennzeichnen statt fälschlich als "fehlt". Ohne lesbare
+    Referenz (``key`` leer) sind alle "fehlt"-Befunde der betroffenen Seite nur vorläufig.
+    """
+
     source: str
     location: str                    # "Zeile 7", "transactions[3]", "id=1017"
     severity: str                    # "error" (Zeile übersprungen) | "warning" (übernommen, aber auffällig)
     message: str
-    reference: str | None = None     # falls bekannt: erlaubt Verknüpfung mit der Gegenseite
-
-    @property
-    def key(self) -> str:
-        return normalize_reference(self.reference)
+    reference: str | None = None     # Roh-Referenz, falls lesbar
+    provider: str | None = None      # "A"/"B", falls bekannt
+    key: str = ""                    # Abgleichsschlüssel nach der ID-Regel des Anbieters, falls lesbar
 
 
 @dataclass
