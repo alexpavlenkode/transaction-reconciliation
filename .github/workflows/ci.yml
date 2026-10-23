@@ -24,7 +24,7 @@ jobs:
       - name: Demo-Lauf (Beispielbericht erzeugen)
         run: python -m txreconcile --as-of 2025-04-01 --out reports
       - name: Beispielbericht ist reproduzierbar (identisch zu examples/)
-        run: python -m txreconcile --as-of 2025-04-01 --out reports --quiet && git diff --no-index --exit-code examples reports
+        run: python -m txreconcile --as-of 2025-04-01 --out reports --quiet && diff -r examples reports
         if: matrix.os == 'ubuntu-latest'
       - name: Berichte als Artefakt ablegen
         if: matrix.os == 'ubuntu-latest' && matrix.python == '3.12'
